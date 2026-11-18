@@ -25,6 +25,10 @@ Weather: Open-Meteo. Sports: ESPN.
   the schedule data, so it survives reloads.
 - **Sun-based dimming** — full brightness by day, a gentle dim easing in over 45 min after sunset,
   the deep dim from `nightDim.deepStart` (22:45), and back to full over the half hour before sunrise.
+- **Weather extras** — the day and date under the clock; a National Weather Service alert strip in the
+  weather card when a watch, warning or advisory covers the house; "Rain in ~20 min" / "Rain until ~3:15pm"
+  from Open-Meteo's 15-minute data; and when no shows are on this month, the shows card shows the next
+  show with a countdown plus the next 12 hours of weather.
 - **Seasonal themes** — accent colors plus a few ambient particles by date (autumn leaves, Halloween
   bats at night, Thanksgiving, December string lights and snow sparkle, New Year fireworks at midnight,
   winter frost, Valentine hearts, St. Patrick's shamrocks, spring petals, summer fireflies at night,
@@ -43,5 +47,7 @@ Add `?test=` with one or more comma-separated items:
 | `night` | treat it as night (bats, fireflies) |
 | `fireworks` | New Year style fireworks |
 | `dim:0.5` | force the night-dim opacity |
+| `alert` | a Winter Storm Warning strip in the weather card |
+| `rain` | the "Rain in ~30 min" line |
 
 Example: `lounge.html?test=season:halloween,night` or `lounge.html?test=gate`.

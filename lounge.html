@@ -48,7 +48,9 @@
   #clockw { left: 560px; top: 8px; width: 336px; height: 360px; z-index: 117; }
   .wrap { background: var(--bg); border: 1px solid var(--border); border-radius: 12px; width: 100%; height: 100%; display: flex; flex-direction: column; overflow: hidden; }
   .row-time { background: var(--bg2); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex: 2; min-height: 0; padding: 6px 14px; gap: 4px; }
-  .time-left { display: flex; align-items: flex-start; gap: 3px; flex: 1; min-width: 0; justify-content: center; }
+  .time-left { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; flex: 1; min-width: 0; }
+  .time-row { display: flex; align-items: flex-start; gap: 3px; }
+  .time-date { font-family: 'Cinzel', serif; font-size: 12px; font-weight: 700; color: var(--gold); letter-spacing: 2px; text-transform: uppercase; white-space: nowrap; }
   .time-main { font-family: 'Cinzel', serif; font-weight: 700; font-size: 44px; line-height: 1; color: var(--warm); letter-spacing: 2px; white-space: nowrap; }
   .time-right { display: flex; flex-direction: column; align-items: flex-start; padding-top: 4px; gap: 2px; }
   .time-sec { font-family: 'Cinzel', serif; font-weight: 700; font-size: 18px; color: var(--gold); line-height: 1; }
@@ -65,6 +67,12 @@
   .info-detail { display: flex; flex-direction: column; gap: 1px; }
   .info-cond { font-size: 9px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
   .info-feels { font-family: 'Cinzel', serif; font-size: 10px; color: var(--warm); }
+  .info-rain { font-size: 9px; font-weight: 600; color: #7aaecc; letter-spacing: .5px; }
+  .info-rain:empty { display: none; }
+  .row-alert { display: none; align-items: center; gap: 8px; padding: 5px 12px; background: #5a2a10; border-bottom: 1px solid var(--border); color: #ffd9a8; font-size: 10px; font-weight: 600; line-height: 1.3; flex-shrink: 0; }
+  .row-alert.on { display: flex; }
+  .row-alert.severe { background: #6e1212; color: #ffe0e0; }
+  .row-alert .alert-when { margin-left: auto; font-weight: 400; font-size: 9px; color: rgba(255,255,255,.7); white-space: nowrap; }
   .info-highlow { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; flex-shrink: 0; }
   .highlow-item { display: flex; align-items: center; gap: 5px; }
   .highlow-label { font-size: 7px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
@@ -92,7 +100,9 @@
   .header { background: var(--bg2); border-bottom: 1px solid var(--border); padding: 6px 12px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
   .title { font-family: 'Cinzel', serif; font-size: 11px; font-weight: 700; color: var(--gold); letter-spacing: 1.5px; }
   .month-label { font-size: 7px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; padding: 3px 12px; border-bottom: 1px solid var(--border); background: var(--bg2); flex-shrink: 0; }
-  .events { flex: 1; overflow: hidden; padding: 2px 0; }
+  .events { flex: 1; overflow: hidden; padding: 2px 0; display: flex; flex-direction: column; }
+  .events > .c-row { flex-shrink: 0; }
+  .events > .hourly { flex: 1; min-height: 0; }
   .c-row { display: flex; align-items: baseline; justify-content: space-between; padding: 5px 12px; border-bottom: 1px solid var(--border); }
   .c-row:last-child { border-bottom: none; }
   .c-name { font-family: 'Cinzel', serif; font-size: 10px; font-weight: 700; color: var(--gold); flex: 1; margin-right: 8px; }
@@ -101,6 +111,21 @@
   .no-label { font-size: 8px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
   .no-month { font-family: 'Cinzel', serif; font-size: 13px; color: var(--gold); }
   .no-detail { font-size: 9px; color: var(--warm); }
+  .next-up .c-name { font-size: 9px; }
+  .next-up .c-name span { color: var(--muted); font-family: 'Archivo', sans-serif; font-weight: 400; letter-spacing: 1px; text-transform: uppercase; font-size: 7px; margin-right: 6px; }
+  .hourly { display: flex; flex-direction: column; height: 100%; }
+  .hourly-title { font-size: 7px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); padding: 4px 12px 2px; }
+  .hourly-row { flex: 1; display: flex; min-height: 0; }
+  .hourly-row + .hourly-row { border-top: 1px solid var(--border); }
+  .h-col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; border-right: 1px solid var(--border); min-width: 0; padding: 3px 0; }
+  .h-col:last-child { border-right: none; }
+  .h-col.now { background: var(--bg2); }
+  .h-time { font-size: 8px; color: var(--muted); letter-spacing: 1px; }
+  .h-col.now .h-time { color: var(--gold); }
+  .h-icon { font-size: 18px; line-height: 1; }
+  .h-temp { font-family: 'Archivo Black', sans-serif; font-size: 13px; color: var(--warm); line-height: 1; }
+  .h-rain { font-size: 8px; color: var(--muted); }
+  .h-rain.wet { color: #7aaecc; }
 
   /* ── CALENDAR ── */
   #calendar { left: 908px; top: 8px; width: 364px; height: 612px; z-index: 116; }
@@ -205,8 +230,11 @@
     <div class="wrap">
       <div class="row-time">
         <div class="time-left">
-          <span class="time-main" id="time-main">--:--</span>
-          <div class="time-right"><span class="time-sec" id="time-sec">:00</span><span class="time-ampm" id="time-ampm"></span></div>
+          <div class="time-row">
+            <span class="time-main" id="time-main">--:--</span>
+            <div class="time-right"><span class="time-sec" id="time-sec">:00</span><span class="time-ampm" id="time-ampm"></span></div>
+          </div>
+          <div class="time-date" id="time-date">—</div>
         </div>
         <div class="moon-side">
           <svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="16" fill="#2a1a24"/><path id="moon-path" fill="#f0d4a8"/></svg>
@@ -218,13 +246,14 @@
         <div class="info-weather">
           <div class="info-icon" id="main-icon">🌤️</div>
           <div class="info-temp" id="cur-temp">—<sup>°F</sup></div>
-          <div class="info-detail"><div class="info-cond" id="cur-cond">Loading</div><div class="info-feels" id="feels-line">—</div></div>
+          <div class="info-detail"><div class="info-cond" id="cur-cond">Loading</div><div class="info-feels" id="feels-line">—</div><div class="info-rain" id="rain-line"></div></div>
         </div>
         <div class="info-highlow">
           <div class="highlow-item"><div class="highlow-label">High</div><div class="highlow-val" id="temp-high">—</div></div>
           <div class="highlow-item"><div class="highlow-label">Low</div><div class="highlow-val" id="temp-low">—</div></div>
         </div>
       </div>
+      <div class="row-alert" id="wx-alert"><span>⚠</span><span id="alert-text"></span><span class="alert-when" id="alert-when"></span></div>
       <div class="row-sunbar">
         <div class="sunbar-track"><div class="sunbar-fill" id="sun-fill" style="width:0%"></div><div class="sunbar-dot" id="sun-dot" style="left:0%"></div></div>
         <div class="sunbar-labels"><div class="sunbar-label" id="bar-rise">🌅 —</div><div class="sunbar-remaining" id="bar-remaining">—</div><div class="sunbar-label" id="bar-set">— 🌇</div></div>
@@ -285,7 +314,7 @@
   var W = 1280, H = 800, HOUR = 3600000, DAY = 86400000;
 
   /* ── ?test= previews ──  e.g. lounge.html?test=gate  or  ?test=win:nyj,season:halloween,night,live,fireworks
-     gate · win[:ABBR] · live · season:NAME · night · fireworks · dim:0.5 */
+     gate · win[:ABBR] · live · season:NAME · night · fireworks · dim:0.5 · alert · rain */
   var TEST = {};
   (new URLSearchParams(location.search).get('test') || '').split(',').forEach(function (s) {
     if (!s) return; var i = s.indexOf(':'); TEST[i < 0 ? s : s.slice(0, i)] = i < 0 ? true : s.slice(i + 1);
@@ -332,6 +361,8 @@
     document.getElementById('time-main').textContent = (h % 12 || 12) + ':' + String(d.getUTCMinutes()).padStart(2, '0');
     document.getElementById('time-sec').textContent = ':' + String(d.getUTCSeconds()).padStart(2, '0');
     document.getElementById('time-ampm').textContent = h < 12 ? 'AM' : 'PM';
+    var date = DAYS[d.getUTCDay()] + ', ' + MONTHS[d.getUTCMonth()] + ' ' + d.getUTCDate(), de = document.getElementById('time-date');
+    if (de.textContent !== date) de.textContent = date;
   }
 
   /* ── Moon ── */
@@ -364,7 +395,7 @@
     if (c >= 71 && c <= 77) return 'Snow'; if (c >= 80 && c <= 82) return 'Rain showers'; if (c === 85 || c === 86) return 'Snow showers';
     if (c >= 95) return 'Thunderstorm'; return 'Mixed';
   }
-  var sun = null, wx = { code: 0, isDay: 1 };
+  var sun = null, wx = { code: 0, isDay: 1 }, hourly = null, m15 = null;
   function minsOf(iso) { var t = iso.split('T')[1].split(':'); return (+t[0]) * 60 + (+t[1]); }
   function fmtSun(iso) { var m = minsOf(iso), h = Math.floor(m / 60); return (h % 12 || 12) + ':' + String(m % 60).padStart(2, '0') + ' ' + (h < 12 ? 'am' : 'pm'); }
   function nowMins() { var d = new Date(nowWall()); return d.getUTCHours() * 60 + d.getUTCMinutes(); }
@@ -381,12 +412,14 @@
   }
   function fetchWeather() {
     var url = 'https://api.open-meteo.com/v1/forecast?latitude=' + LOC.lat + '&longitude=' + LOC.lon +
-      '&current=temperature_2m,apparent_temperature,weather_code,is_day,wind_speed_10m' +
+      '&current=temperature_2m,apparent_temperature,weather_code,is_day,wind_speed_10m,precipitation' +
+      '&hourly=temperature_2m,weather_code,precipitation_probability,is_day&minutely_15=precipitation,precipitation_probability' +
       '&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,precipitation_probability_max' +
       '&temperature_unit=fahrenheit&wind_speed_unit=mph&timezone=' + encodeURIComponent(TZ) + '&forecast_days=5';
     fetch(url).then(function (r) { return r.json(); }).then(function (j) {
       var c = j.current, d = j.daily;
-      wx = { code: c.weather_code, isDay: c.is_day, wind: c.wind_speed_10m || 0 };
+      wx = { code: c.weather_code, isDay: c.is_day, wind: c.wind_speed_10m || 0, temp: c.temperature_2m, precip: c.precipitation || 0 };
+      hourly = j.hourly || null; m15 = j.minutely_15 || null;
       document.getElementById('main-icon').textContent = wIcon(c.weather_code, c.is_day);
       document.getElementById('cur-temp').innerHTML = Math.round(c.temperature_2m) + '<sup>°F</sup>';
       document.getElementById('cur-cond').textContent = wLabel(c.weather_code);
@@ -404,8 +437,66 @@
       }
       document.getElementById('forecast-row').innerHTML = html;
       document.getElementById('w-updated').textContent = updatedStamp();
-      updateSunBar(); updateDim(); fx.setCondition(wx); applyTheme();
+      updateSunBar(); updateDim(); fx.setCondition(wx); applyTheme(); renderRainLine(); refreshConcerts();
     }).catch(function () { document.getElementById('cur-cond').textContent = 'Unavailable'; });
+  }
+
+  /* ── "Rain in ~20 min" from Open-Meteo's 15-minute data (next 3 hours) ── */
+  function renderRainLine() {
+    var el = document.getElementById('rain-line'), now = nowWall(), slots = [];
+    if (TEST.rain) { for (var k = 0; k < 12; k++) slots.push({ t: now + k * 15 * 60000, p: k >= 2 ? 0.6 : 0, pr: k >= 2 ? 80 : 10 }); }
+    else if (m15 && m15.time) {
+      for (var i = 0; i < m15.time.length && slots.length < 12; i++) {
+        var t = wallParse(m15.time[i]); if (t + 15 * 60000 <= now) continue;
+        slots.push({ t: t, p: m15.precipitation[i] || 0, pr: (m15.precipitation_probability && m15.precipitation_probability[i]) || 0 });
+      }
+    }
+    if (!slots.length) { el.textContent = ''; return; }
+    var wet = function (s) { return s.p >= 0.1 && s.pr >= 40; };
+    var word = (wx.temp != null && wx.temp <= 33) || (wx.code >= 71 && wx.code <= 77) || wx.code === 85 || wx.code === 86 ? 'Snow' : 'Rain';
+    var text = '';
+    if ((wx.precip || 0) > 0.05 || wet(slots[0])) {                 // raining now: when does it let up?
+      for (var a = 1; a < slots.length - 1; a++) { if (slots[a].p < 0.05 && slots[a + 1].p < 0.05) { text = word + ' until ~' + clock12(slots[a].t); break; } }
+      if (!text) text = word + ' for the next few hours';
+    } else {
+      for (var b = 0; b < slots.length; b++) { if (wet(slots[b])) { var mins = Math.round((slots[b].t - now) / 60000); text = mins < 5 ? word + ' starting now' : word + ' in ~' + (mins < 60 ? mins + ' min' : (Math.round(mins / 15) * 15 / 60).toFixed(mins % 60 ? 1 : 0).replace('.0', '') + ' h'); break; } }
+    }
+    el.textContent = text;
+  }
+
+  /* ── National Weather Service alerts for this point ── */
+  var SEV = { Extreme: 0, Severe: 1, Moderate: 2, Minor: 3 };
+  function renderAlerts(features) {
+    var now = Date.now(), el = document.getElementById('wx-alert');
+    var list = (features || []).map(function (f) { return f.properties || f; }).filter(function (a) {
+      if (a.status && a.status !== 'Actual') return false; if (a.messageType === 'Cancel') return false; if (/Outlook|Test/i.test(a.event || '')) return false;
+      var end = Date.parse(a.ends || a.expires || ''); return !end || end > now;
+    }).sort(function (a, b) { return (SEV[a.severity] != null ? SEV[a.severity] : 4) - (SEV[b.severity] != null ? SEV[b.severity] : 4); });
+    if (!list.length) { el.classList.remove('on'); return; }
+    var top = list[0], end = Date.parse(top.ends || top.expires || ''), when = '';
+    if (end) { var w = wallOf(new Date(end)); when = 'until ' + (dayStart(w) === dayStart(nowWall()) ? '' : DOW3[new Date(w).getUTCDay()] + ' ') + clock12(w); }
+    document.getElementById('alert-text').textContent = top.event + (list.length > 1 ? ' · +' + (list.length - 1) + ' more' : '');
+    document.getElementById('alert-when').textContent = when;
+    el.classList.toggle('severe', top.severity === 'Extreme' || top.severity === 'Severe');
+    el.classList.add('on');
+  }
+  function fetchAlerts() {
+    if (TEST.alert) { renderAlerts([{ event: 'Winter Storm Warning', severity: 'Severe', status: 'Actual', ends: new Date(Date.now() + 20 * HOUR).toISOString() }, { event: 'Wind Advisory', severity: 'Moderate', status: 'Actual', ends: new Date(Date.now() + 3 * HOUR).toISOString() }]); return; }
+    fetch('https://api.weather.gov/alerts/active?point=' + LOC.lat + ',' + LOC.lon).then(function (r) { return r.json(); }).then(function (j) { renderAlerts(j.features); }).catch(function () {});
+  }
+
+  /* ── Next 12 hours (fills the shows card when nothing is on this month) ── */
+  function hourlyHtml() {
+    if (!hourly || !hourly.time) return '';
+    var now = nowWall(), cols = [];
+    for (var i = 0; i < hourly.time.length && cols.length < 12; i++) {
+      var t = wallParse(hourly.time[i]); if (t + HOUR <= now) continue;
+      var d = new Date(t), h = d.getUTCHours(), pr = (hourly.precipitation_probability && hourly.precipitation_probability[i]) || 0;
+      cols.push('<div class="h-col' + (cols.length ? '' : ' now') + '"><div class="h-time">' + (cols.length ? (h % 12 || 12) + (h < 12 ? 'am' : 'pm') : 'Now') + '</div><div class="h-icon">' + wIcon(hourly.weather_code[i], hourly.is_day ? hourly.is_day[i] : 1) +
+        '</div><div class="h-temp">' + Math.round(hourly.temperature_2m[i]) + '°</div><div class="h-rain' + (pr >= 30 ? ' wet' : '') + '">' + pr + '%</div></div>');
+    }
+    if (!cols.length) return '';
+    return '<div class="hourly"><div class="hourly-title">Next 12 hours</div><div class="hourly-row">' + cols.slice(0, 6).join('') + '</div><div class="hourly-row">' + cols.slice(6).join('') + '</div></div>';
   }
 
   /* ── Data feed (one small Google Apps Script feed: next 3 weeks, concerts, photo links, sensors) ── */
@@ -443,7 +534,10 @@
   }
 
   /* ── Concerts · Movies · Shows ── */
+  var lastConcerts = null;
+  function refreshConcerts() { if (lastConcerts) renderConcerts(lastConcerts); }
   function renderConcerts(list) {
+    lastConcerts = list || [];
     var now = nowWall(), today = dayStart(now), nd = new Date(now), y = nd.getUTCFullYear(), m = nd.getUTCMonth();
     var monthEnd = Date.UTC(y, m + 1, 1);
     var all = (list || []).map(function (e) { return { summary: e.title, start: wallParse(e.start), end: wallParse(e.end || e.start), allDay: e.allDay }; })
@@ -455,11 +549,11 @@
     if (thisMonth.length) {
       box.innerHTML = thisMonth.slice(0, 8).map(function (o) { return '<div class="c-row"><div class="c-name">' + esc(o.summary) + '</div><div class="c-date">' + dlabel(o.start) + '</div></div>'; }).join('');
     } else {
-      document.getElementById('month-label').textContent = 'Nothing this month';
-      var next = all[0];
-      box.innerHTML = '<div class="no-events">' + (next ?
-        '<div class="no-label">Next up in</div><div class="no-month">' + MONTHS[new Date(next.start).getUTCMonth()] + '</div><div class="no-detail">· ' + esc(next.summary) + ' — ' + dlabel(next.start) + '</div>'
-        : '<div class="no-label">Nothing on the calendar yet</div>') + '</div>';
+      document.getElementById('month-label').textContent = 'No shows this month';
+      var next = all[0], days = next ? Math.round((dayStart(next.start) - today) / DAY) : 0;
+      box.innerHTML = '<div class="c-row next-up">' + (next ?
+        '<div class="c-name"><span>Next up</span>' + esc(next.summary) + '</div><div class="c-date">' + dlabel(next.start) + ' · ' + (days <= 0 ? 'today' : days === 1 ? 'tomorrow' : 'in ' + days + ' days') + '</div>'
+        : '<div class="c-name"><span>Next up</span>Nothing on the calendar yet</div>') + '</div>' + hourlyHtml();
     }
     document.getElementById('c-updated').textContent = updatedStamp();
   }
@@ -1008,20 +1102,22 @@
   })();
 
   /* ── Go ── */
-  tick(); updateMoon(); updateDim(); fetchWeather(); fetchFeed(); fetchGames(); fetchSensors(); fx.setCondition(wx); applyTheme();
+  tick(); updateMoon(); updateDim(); fetchWeather(); fetchAlerts(); fetchFeed(); fetchGames(); fetchSensors(); fx.setCondition(wx); applyTheme();
   setInterval(tick, 1000);
   setInterval(fetchSensors, 20 * 1000);
   setInterval(function () { updateSunBar(); updateDim(); }, 30 * 1000);
   setInterval(function () { applyTheme(); pollLive(); }, 60 * 1000);
   setInterval(updateMoon, 10 * 60 * 1000);
   setInterval(fetchWeather, 10 * 60 * 1000);
+  setInterval(fetchAlerts, 10 * 60 * 1000);
+  setInterval(function () { renderRainLine(); }, 60 * 1000);
   setInterval(fetchFeed, 15 * 60 * 1000);
   setInterval(fetchGames, 5 * 60 * 1000);
   setTimeout(function () { location.reload(); }, 6 * 60 * 60 * 1000);   // fresh start every 6 hours
 
   // Hooks for the Playwright checks (not used by the board itself)
   window.LOUNGE = { dimLevel: dimLevel, seasonOf: seasonOf, ambientFor: ambientFor, fireworksNow: fireworksNow, currentWin: currentWin, fx: fx, TEST: TEST,
-    sched: function () { return sched; }, renderSensors: renderSensors, applyTheme: applyTheme, setSun: function (r, s) { sun = { rise: r, set: s }; } };
+    sched: function () { return sched; }, renderSensors: renderSensors, renderAlerts: renderAlerts, applyTheme: applyTheme, setSun: function (r, s) { sun = { rise: r, set: s }; } };
 })();
 </script>
 </body>
