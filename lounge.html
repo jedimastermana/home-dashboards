@@ -48,9 +48,11 @@
   #clockw { left: 560px; top: 8px; width: 336px; height: 360px; z-index: 117; }
   .wrap { background: var(--bg); border: 1px solid var(--border); border-radius: 12px; width: 100%; height: 100%; display: flex; flex-direction: column; overflow: hidden; }
   .row-time { background: var(--bg2); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex: 2; min-height: 0; padding: 6px 14px; gap: 4px; }
-  .time-left { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; flex: 1; min-width: 0; }
+  .time-left { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 7px; flex: 1; min-width: 0; }
   .time-row { display: flex; align-items: flex-start; gap: 3px; }
-  .time-date { font-family: 'Cinzel', serif; font-size: 12px; font-weight: 700; color: var(--gold); letter-spacing: 2px; text-transform: uppercase; white-space: nowrap; }
+  .time-date { display: flex; flex-direction: column; align-items: center; gap: 3px; white-space: nowrap; }
+  .time-dow { font-family: 'Cinzel', serif; font-size: 11px; font-weight: 700; color: var(--gold); letter-spacing: 3px; text-transform: uppercase; line-height: 1; }
+  .time-day { font-family: 'Cinzel', serif; font-size: 14px; color: var(--warm); letter-spacing: 1px; line-height: 1; }
   .time-main { font-family: 'Cinzel', serif; font-weight: 700; font-size: 44px; line-height: 1; color: var(--warm); letter-spacing: 2px; white-space: nowrap; }
   .time-right { display: flex; flex-direction: column; align-items: flex-start; padding-top: 4px; gap: 2px; }
   .time-sec { font-family: 'Cinzel', serif; font-weight: 700; font-size: 18px; color: var(--gold); line-height: 1; }
@@ -234,7 +236,7 @@
             <span class="time-main" id="time-main">--:--</span>
             <div class="time-right"><span class="time-sec" id="time-sec">:00</span><span class="time-ampm" id="time-ampm"></span></div>
           </div>
-          <div class="time-date" id="time-date">—</div>
+          <div class="time-date"><span class="time-dow" id="time-dow">—</span><span class="time-day" id="time-day">—</span></div>
         </div>
         <div class="moon-side">
           <svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="16" fill="#2a1a24"/><path id="moon-path" fill="#f0d4a8"/></svg>
@@ -361,8 +363,8 @@
     document.getElementById('time-main').textContent = (h % 12 || 12) + ':' + String(d.getUTCMinutes()).padStart(2, '0');
     document.getElementById('time-sec').textContent = ':' + String(d.getUTCSeconds()).padStart(2, '0');
     document.getElementById('time-ampm').textContent = h < 12 ? 'AM' : 'PM';
-    var date = DAYS[d.getUTCDay()] + ', ' + MONTHS[d.getUTCMonth()] + ' ' + d.getUTCDate(), de = document.getElementById('time-date');
-    if (de.textContent !== date) de.textContent = date;
+    var day = MONTHS[d.getUTCMonth()] + ' ' + d.getUTCDate(), de = document.getElementById('time-day');
+    if (de.textContent !== day) { de.textContent = day; document.getElementById('time-dow').textContent = DAYS[d.getUTCDay()]; }
   }
 
   /* ── Moon ── */
