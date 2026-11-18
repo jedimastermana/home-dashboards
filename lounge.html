@@ -549,8 +549,14 @@
       }
     }).catch(function () {});
   }
-  function nextGame(team) { return (sched[team.abbr] || []).filter(function (g) { return !g.completed; })[0] || null; }
-  function lastGame(team) { var done = (sched[team.abbr] || []).filter(function (g) { return g.completed; }); return done.length ? done[done.length - 1] : null; }
+  function upcoming(team) { return (sched[team.abbr] || []).filter(function (g) { return !g.completed; }); }
+  function nextGame(team) { return upcoming(team)[0] || null; }
+  function finalTime(g) { return finals[g.id] || (g.when + 3 * HOUR); }   // when the game ended (seen, or estimated)
+  var SHOW_MS = 18 * HOUR;                                               // a result and its celebration stay for ~18 h
+  function recentLast(team) {
+    var done = (sched[team.abbr] || []).filter(function (g) { return g.completed; }), g = done.length ? done[done.length - 1] : null;
+    return g && nowWall() < finalTime(g) + SHOW_MS ? g : null;
+  }
   function fetchGames() {
     Promise.all(TEAMS.map(fetchTeam)).then(function () {
       if (TEST.live && TEAMS[0]) {
@@ -601,8 +607,7 @@
     var logo = 'https://a.espncdn.com/i/teamlogos/' + team.league + '/500/' + team.abbr.toLowerCase() + '.png';
     var head = '<div class="tile-top"><span class="tile-team" style="--team:' + team.colors[0] + '">' + esc(team.name) + '</span>';
     if (!g) {
-      return '<div class="tile empty">' + head + '<span class="tile-tag">' + (kind === 'last' ? 'Last' : 'Next') + '</span></div><div class="tile-body"><div class="mid"><div class="sub">' +
-        (kind === 'last' ? 'No results yet this season' : 'No games scheduled') + '</div></div></div></div>';
+      return '<div class="tile empty">' + head + '<span class="tile-tag">' + (kind === 'then' ? 'Then' : 'Next') + '</span></div><div class="tile-body"><div class="mid"><div class="sub">No games scheduled</div></div></div></div>';
     }
     var us = g.home ? sideHtml(logo, team.abbr, g.us, g.lost) : null, them = sideHtml(g.oppLogo, g.opp, g.them, g.won), mine = us || sideHtml(logo, team.abbr, g.us, g.lost);
     var left = g.home ? them : mine, right = g.home ? mine : them, mid;
@@ -614,7 +619,7 @@
       head += '<span class="tile-tag ' + (g.won ? 'won' : 'lost') + '">' + (g.won ? 'Win' : 'Final') + '</span></div>';
       mid = '<div class="lbl">Final' + (g.period > 4 ? '/OT' : '') + '</div><div class="big ' + res.toLowerCase() + '">' + res + '</div><div class="sub muted">' + dayLabel(g.when) + '</div>';
     } else {
-      head += '<span class="tile-tag">Next</span></div>';
+      head += '<span class="tile-tag">' + (kind === 'then' ? 'Then' : 'Next') + '</span></div>';
       var when = g.tbd ? 'Time TBD' : clockFull(g.when);
       if (g.status === 'STATUS_POSTPONED') when = 'Postponed';
       mid = '<div class="vs">' + (g.home ? 'vs' : 'at') + '</div><div class="sub">' + dayLabel(g.when) + '</div><div class="when">' + esc(when) + '</div>';
@@ -623,13 +628,15 @@
   }
   function renderSports() {
     var tiles = [];
-    TEAMS.forEach(function (t) { tiles.push(tileHtml(t, lastGame(t), 'last'), tileHtml(t, nextGame(t), 'next')); });
+    TEAMS.forEach(function (t) {                     // Last + Next for ~18 h after a game, then Next + Then
+      var last = recentLast(t), up = upcoming(t);
+      if (last) tiles.push(tileHtml(t, last, 'last'), tileHtml(t, up[0], 'next')); else tiles.push(tileHtml(t, up[0], 'next'), tileHtml(t, up[1], 'then'));
+    });
     document.getElementById('tiles').innerHTML = tiles.join('') || '<div class="tile empty"><div class="tile-body"><div class="mid"><div class="sub">No teams in config.js</div></div></div></div>';
     document.getElementById('s-updated').textContent = updatedStamp() + (activeGames().length ? ' · live every 60 s' : ' · schedules every 5 min');
   }
 
   /* ── Win celebration: team colors + banner + confetti for ~18 h after a final ── */
-  var CELEBRATE_MS = 18 * HOUR;
   function currentWin() {
     if (TEST.win) {
       var t = TEAMS.filter(function (x) { return TEST.win === true || x.abbr.toLowerCase() === String(TEST.win).toLowerCase(); })[0] || TEAMS[0];
@@ -639,8 +646,8 @@
     TEAMS.forEach(function (t) {
       (sched[t.abbr] || []).forEach(function (g) {
         if (!g.completed || !g.won) return;
-        var ft = finals[g.id] || (g.when + 3 * HOUR);
-        if (now < ft + CELEBRATE_MS && (!best || ft > best.ft)) best = { team: t, us: g.us, them: g.them, home: g.home, oppName: g.oppName, when: g.when, ft: ft };
+        var ft = finalTime(g);
+        if (now < ft + SHOW_MS && (!best || ft > best.ft)) best = { team: t, us: g.us, them: g.them, home: g.home, oppName: g.oppName, when: g.when, ft: ft };
       });
     });
     return best;

@@ -17,8 +17,9 @@ Weather: Open-Meteo. Sports: ESPN.
 - **Gate warning** — polls the feed's `?part=sensors` every 20 s. Any open `gate` sensor takes over
   the screen with a ~1 Hz pulsing red warning (gate name, "open since h:mm (N min)"), above the night
   dim. Open garage doors get a small chip at the top of the photo instead.
-- **Sports** — one tile per team for the last result and the next game. During a game the next-game
-  tile turns live (score, period, clock) and refreshes every 60 s from the ESPN scoreboard.
+- **Sports** — two tiles per team: the last result and the next game for ~18 h after a game (the same
+  window as the win celebration), then the next two games. During a game the next-game tile turns live
+  (score, period, clock) and refreshes every 60 s from the ESPN scoreboard.
 - **Win celebration** — for ~18 h after a Jets or 76ers win the board switches to that team's colors,
   shows a banner at the foot of the photo and fires an occasional confetti burst. It is derived from
   the schedule data, so it survives reloads.
