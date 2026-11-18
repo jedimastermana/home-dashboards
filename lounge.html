@@ -531,7 +531,10 @@
       });
       html += '</div>';
     }
-    document.getElementById('days').innerHTML = html;
+    var box = document.getElementById('days'); box.innerHTML = html;
+    // On a busy week, drop whole days off the bottom rather than cutting one in half.
+    var limit = box.getBoundingClientRect().bottom;
+    [].slice.call(box.children).forEach(function (el) { if (el.getBoundingClientRect().bottom > limit + 1) el.style.display = 'none'; });
     document.getElementById('cal-updated').textContent = updatedStamp();
   }
 
