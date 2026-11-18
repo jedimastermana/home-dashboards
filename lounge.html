@@ -11,7 +11,8 @@
 <style>
   :root {
     --bg: #1a1118; --bg2: #221620; --bg-today: #2a1a24; --border: #3d2a38; --border-today: #6b3a52;
-    --gold: #c9954a; --gold-dim: #6b4d27; --warm: #f0d4a8; --muted: #a08898; --live: #e8a060;
+    --gold: #c9954a; --gold-dim: #6b4d27; --hi: #f5c97a; --frame: #c9954a;
+    --warm: #f0d4a8; --muted: #a08898; --live: #e8a060;
     --cal-main: #5dbf7a; --cal-household: #e07840; --cal-dinner: #e05070;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -20,87 +21,91 @@
   .block { position: absolute; }
   .gem { width: 4px; height: 4px; background: var(--gold-dim); transform: rotate(45deg); display: inline-block; }
 
+  /* ── LAYOUT GRID ──
+     8px outer margin, 12px gutters. Photo column 540 wide; right side split 336 + 364.
+     Rows: clock 360 / concerts 240 (left), calendar 612 (right), sports 160 across the bottom. */
+
   /* ── PHOTO + FRAME ── */
-  #photo { left: 12px; top: 13px; width: 527px; height: 778px; overflow: hidden; background: #120c10; z-index: 113; }
+  #photo { left: 19px; top: 19px; width: 518px; height: 762px; overflow: hidden; background: #120c10; z-index: 113; }
   #photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 2s ease; }
   #photo img.on { opacity: 1; }
   #photo .vignette { position: absolute; inset: 0; background: radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,.65) 100%); z-index: 2; }
   #photo .empty { position: absolute; inset: 0; background: radial-gradient(ellipse at center, #2a1a24 0%, #120c10 75%); }
-  #frame { left: 1px; top: 4px; width: 548px; height: 794px; pointer-events: none; z-index: 118; }
-  #frame::before { content: ''; position: absolute; inset: 6px; border: 1px solid #c9954a; border-radius: 2px; }
-  #frame::after { content: ''; position: absolute; inset: 10px; border: 1px solid rgba(201,149,74,.35); border-radius: 1px; }
+  #frame { left: 8px; top: 8px; width: 540px; height: 784px; pointer-events: none; z-index: 118; }
+  #frame::before { content: ''; position: absolute; inset: 6px; border: 1px solid var(--frame); border-radius: 2px; }
+  #frame::after { content: ''; position: absolute; inset: 10px; border: 1px solid var(--frame); opacity: .35; border-radius: 1px; }
   #frame .corner { position: absolute; width: 20px; height: 20px; }
-  #frame .corner::before, #frame .corner::after { content: ''; position: absolute; background: #c9954a; }
+  #frame .corner::before, #frame .corner::after { content: ''; position: absolute; background: var(--frame); }
   #frame .corner::before { width: 100%; height: 1.5px; top: 0; left: 0; }
   #frame .corner::after { width: 1.5px; height: 100%; top: 0; left: 0; }
   #frame .tl { top: 3px; left: 3px; } #frame .tr { top: 3px; right: 3px; transform: scaleX(-1); }
   #frame .bl { bottom: 3px; left: 3px; transform: scaleY(-1); } #frame .br { bottom: 3px; right: 3px; transform: scale(-1); }
-  #frame .fgem { position: absolute; width: 6px; height: 6px; background: #c9954a; transform: rotate(45deg); }
+  #frame .fgem { position: absolute; width: 6px; height: 6px; background: var(--frame); transform: rotate(45deg); }
   #frame .fgem.top { top: 4px; left: 50%; margin-left: -3px; } #frame .fgem.bottom { bottom: 4px; left: 50%; margin-left: -3px; }
   #frame .fgem.left { left: 4px; top: 50%; margin-top: -3px; } #frame .fgem.right { right: 4px; top: 50%; margin-top: -3px; }
 
   /* ── CLOCK + WEATHER ── */
-  #clockw { left: 541px; top: 0; width: 341px; height: 386px; padding: 7px; z-index: 117; }
+  #clockw { left: 560px; top: 8px; width: 336px; height: 360px; z-index: 117; }
   .wrap { background: var(--bg); border: 1px solid var(--border); border-radius: 12px; width: 100%; height: 100%; display: flex; flex-direction: column; overflow: hidden; }
   .row-time { background: var(--bg2); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex: 2; min-height: 0; padding: 6px 14px; gap: 4px; }
   .time-left { display: flex; align-items: flex-start; gap: 3px; flex: 1; min-width: 0; justify-content: center; }
-  .time-main { font-family: 'Cinzel', serif; font-weight: 700; font-size: 40px; line-height: 1; color: var(--warm); letter-spacing: 2px; white-space: nowrap; }
-  .time-right { display: flex; flex-direction: column; align-items: flex-start; padding-top: 4px; gap: 1px; }
+  .time-main { font-family: 'Cinzel', serif; font-weight: 700; font-size: 44px; line-height: 1; color: var(--warm); letter-spacing: 2px; white-space: nowrap; }
+  .time-right { display: flex; flex-direction: column; align-items: flex-start; padding-top: 4px; gap: 2px; }
   .time-sec { font-family: 'Cinzel', serif; font-weight: 700; font-size: 18px; color: var(--gold); line-height: 1; }
   .time-ampm { font-family: 'Cinzel', serif; font-size: 11px; color: var(--muted); letter-spacing: 2px; line-height: 1; }
   .moon-side { display: flex; flex-direction: column; align-items: center; gap: 3px; flex-shrink: 0; border-left: 1px solid var(--border); padding-left: 12px; margin-left: 8px; }
   .moon-side svg { width: 40px; height: 40px; display: block; }
-  .moon-phase { font-family: 'Cinzel', serif; font-size: 7px; color: var(--gold); letter-spacing: 1px; text-transform: uppercase; text-align: center; }
-  .moon-illum { font-size: 6px; color: var(--muted); text-align: center; }
-  .row-info { background: var(--bg2); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; padding: 5px 12px; gap: 8px; }
+  .moon-phase { font-family: 'Cinzel', serif; font-size: 8px; color: var(--gold); letter-spacing: 1px; text-transform: uppercase; text-align: center; }
+  .moon-illum { font-size: 7px; color: var(--muted); text-align: center; }
+  .row-info { background: var(--bg2); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; padding: 6px 12px; gap: 8px; }
   .info-weather { display: flex; align-items: center; gap: 6px; }
-  .info-icon { font-size: 22px; }
-  .info-temp { font-family: 'Archivo Black', sans-serif; font-size: 20px; color: var(--warm); line-height: 1; white-space: nowrap; }
+  .info-icon { font-size: 24px; }
+  .info-temp { font-family: 'Archivo Black', sans-serif; font-size: 22px; color: var(--warm); line-height: 1; white-space: nowrap; }
   .info-temp sup { font-size: .5em; color: var(--muted); vertical-align: super; }
-  .info-detail { display: flex; flex-direction: column; }
-  .info-cond { font-size: 8px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
-  .info-feels { font-family: 'Cinzel', serif; font-size: 9px; color: var(--warm); }
+  .info-detail { display: flex; flex-direction: column; gap: 1px; }
+  .info-cond { font-size: 9px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
+  .info-feels { font-family: 'Cinzel', serif; font-size: 10px; color: var(--warm); }
   .info-highlow { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; flex-shrink: 0; }
-  .highlow-item { display: flex; align-items: center; gap: 4px; }
-  .highlow-label { font-size: 6px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
-  .highlow-val { font-family: 'Cinzel', serif; font-size: 11px; color: var(--warm); white-space: nowrap; }
-  .row-sunbar { padding: 6px 12px 7px; border-bottom: 1px solid var(--border); background: var(--bg); flex-shrink: 0; display: flex; flex-direction: column; gap: 4px; }
-  .sunbar-track { position: relative; height: 2px; background: #3d2a38; border-radius: 1px; }
-  .sunbar-fill { position: absolute; left: 0; top: 0; height: 100%; background: #c9954a; border-radius: 1px; }
-  .sunbar-dot { position: absolute; top: 50%; transform: translate(-50%,-50%); width: 7px; height: 7px; border-radius: 50%; background: #f5c97a; border: 1.5px solid #c9954a; }
+  .highlow-item { display: flex; align-items: center; gap: 5px; }
+  .highlow-label { font-size: 7px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
+  .highlow-val { font-family: 'Cinzel', serif; font-size: 12px; color: var(--warm); white-space: nowrap; }
+  .row-sunbar { padding: 7px 12px 7px; border-bottom: 1px solid var(--border); background: var(--bg); flex-shrink: 0; display: flex; flex-direction: column; gap: 5px; }
+  .sunbar-track { position: relative; height: 2px; background: var(--border); border-radius: 1px; }
+  .sunbar-fill { position: absolute; left: 0; top: 0; height: 100%; background: var(--frame); border-radius: 1px; }
+  .sunbar-dot { position: absolute; top: 50%; transform: translate(-50%,-50%); width: 7px; height: 7px; border-radius: 50%; background: var(--hi); border: 1.5px solid var(--frame); }
   .sunbar-labels { display: flex; justify-content: space-between; align-items: center; }
-  .sunbar-label { font-size: 6px; color: var(--muted); letter-spacing: 1px; }
-  .sunbar-remaining { font-size: 6px; color: var(--gold); letter-spacing: 1px; }
+  .sunbar-label { font-size: 8px; color: var(--muted); letter-spacing: 1px; }
+  .sunbar-remaining { font-size: 8px; color: var(--gold); letter-spacing: 1px; }
   .forecast-col { display: flex; flex: 2; min-height: 0; }
-  .fc-day { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; padding: 4px 2px; border-right: 1px solid var(--border); min-width: 0; }
+  .fc-day { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; padding: 4px 2px; border-right: 1px solid var(--border); min-width: 0; }
   .fc-day:last-child { border-right: none; }
-  .fc-label { font-family: 'Cinzel', serif; font-size: 8px; color: var(--warm); letter-spacing: 1px; text-transform: uppercase; }
-  .fc-icon { font-size: 20px; line-height: 1; }
-  .fc-high { font-family: 'Archivo Black', sans-serif; font-size: 15px; color: var(--warm); }
-  .fc-rain { font-size: 8px; color: var(--muted); }
+  .fc-label { font-family: 'Cinzel', serif; font-size: 9px; color: var(--warm); letter-spacing: 1px; text-transform: uppercase; }
+  .fc-icon { font-size: 22px; line-height: 1; }
+  .fc-high { font-family: 'Archivo Black', sans-serif; font-size: 16px; color: var(--warm); }
+  .fc-rain { font-size: 9px; color: var(--muted); }
   .fc-rain.wet { color: #7aaecc; }
-  .footer { background: var(--bg2); border-top: 1px solid var(--border); padding: 2px 12px; font-size: 5px; color: var(--muted); letter-spacing: 1px; display: flex; justify-content: space-between; flex-shrink: 0; }
+  .footer { background: var(--bg2); border-top: 1px solid var(--border); padding: 3px 12px; font-size: 7px; color: var(--muted); letter-spacing: 1px; display: flex; justify-content: space-between; flex-shrink: 0; }
 
   /* ── CONCERTS ── */
-  #concerts { left: 541px; top: 374px; width: 340px; height: 260px; padding: 7px; z-index: 119; }
+  #concerts { left: 560px; top: 380px; width: 336px; height: 240px; z-index: 119; }
   #concerts .wrap { border-radius: 10px; }
-  .header { background: var(--bg2); border-bottom: 1px solid var(--border); padding: 5px 12px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
-  .title { font-family: 'Cinzel', serif; font-size: 10px; font-weight: 700; color: var(--gold); letter-spacing: 1.5px; }
-  .month-label { font-size: 6px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; padding: 3px 12px; border-bottom: 1px solid var(--border); background: var(--bg2); flex-shrink: 0; }
+  .header { background: var(--bg2); border-bottom: 1px solid var(--border); padding: 6px 12px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+  .title { font-family: 'Cinzel', serif; font-size: 11px; font-weight: 700; color: var(--gold); letter-spacing: 1.5px; }
+  .month-label { font-size: 7px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; padding: 3px 12px; border-bottom: 1px solid var(--border); background: var(--bg2); flex-shrink: 0; }
   .events { flex: 1; overflow: hidden; padding: 2px 0; }
-  .c-row { display: flex; align-items: baseline; justify-content: space-between; padding: 4px 12px; border-bottom: 1px solid var(--border); }
+  .c-row { display: flex; align-items: baseline; justify-content: space-between; padding: 5px 12px; border-bottom: 1px solid var(--border); }
   .c-row:last-child { border-bottom: none; }
-  .c-name { font-family: 'Cinzel', serif; font-size: 9px; font-weight: 700; color: var(--gold); flex: 1; margin-right: 8px; }
-  .c-date { font-size: 8px; color: var(--warm); white-space: nowrap; }
-  .no-events { padding: 8px 12px; display: flex; flex-direction: column; gap: 3px; }
-  .no-label { font-size: 7px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
-  .no-month { font-family: 'Cinzel', serif; font-size: 11px; color: var(--gold); }
-  .no-detail { font-size: 8px; color: var(--warm); }
+  .c-name { font-family: 'Cinzel', serif; font-size: 10px; font-weight: 700; color: var(--gold); flex: 1; margin-right: 8px; }
+  .c-date { font-size: 9px; color: var(--warm); white-space: nowrap; }
+  .no-events { padding: 10px 12px; display: flex; flex-direction: column; gap: 4px; }
+  .no-label { font-size: 8px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
+  .no-month { font-family: 'Cinzel', serif; font-size: 13px; color: var(--gold); }
+  .no-detail { font-size: 9px; color: var(--warm); }
 
   /* ── CALENDAR ── */
-  #calendar { left: 872px; top: 0; width: 404px; height: 638px; padding: 7px; z-index: 116; }
+  #calendar { left: 908px; top: 8px; width: 364px; height: 612px; z-index: 116; }
   #calendar .header { padding: 8px 14px; }
-  #calendar .title { font-size: 11px; }
+  #calendar .title { font-size: 12px; }
   .legend { display: flex; gap: 10px; align-items: center; padding: 5px 14px; flex-shrink: 0; border-bottom: 1px solid var(--border); background: var(--bg2); }
   .legend-item { display: flex; align-items: center; gap: 4px; }
   .legend-dot { width: 6px; height: 6px; border-radius: 50%; }
@@ -113,8 +118,8 @@
   .day-header { display: flex; align-items: baseline; gap: 6px; margin-bottom: 3px; }
   .day-name { font-family: 'Cinzel', serif; font-size: 9px; font-weight: 700; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
   .day-date { font-size: 8px; color: var(--muted); letter-spacing: 1px; }
-  .today-block .day-name { font-size: 14px; color: #f5c97a; text-shadow: 0 0 8px rgba(245,201,122,.4); }
-  .today-block .day-date { font-size: 11px; color: #d4a855; }
+  .today-block .day-name { font-size: 14px; color: var(--hi); text-shadow: 0 0 8px rgba(245,201,122,.4); }
+  .today-block .day-date { font-size: 11px; color: var(--gold); }
   .event-row { display: flex; align-items: center; gap: 6px; padding: 2px 0; }
   .event-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
   .event-dot.cal-main { background: var(--cal-main); } .event-dot.cal-household { background: var(--cal-household); } .event-dot.cal-dinner { background: var(--cal-dinner); }
@@ -126,28 +131,62 @@
   .status { padding: 16px 14px; font-size: 9px; color: var(--muted); font-style: italic; }
 
   /* ── SPORTS ── */
-  #sports { left: 541px; top: 626px; width: 733px; height: 172px; padding: 5px; z-index: 115; display: flex; align-items: flex-start; justify-content: center; }
-  .game-vs { font-size: 5px; color: var(--muted); text-align: center; width: 100%; }
-  #sports .card { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; width: 100%; overflow: hidden; }
-  #sports .card-header { background: var(--bg2); border-bottom: 1px solid var(--border); padding: 4px 8px; display: flex; align-items: center; justify-content: space-between; }
-  #sports .card-title { font-family: 'Cinzel', serif; font-size: 8px; letter-spacing: 2px; color: var(--gold); }
-  .games-row { display: flex; align-items: stretch; }
-  .game-card { flex: 2; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 5px 4px; border-right: 1px solid var(--border); position: relative; overflow: hidden; }
-  .game-card:last-child { border-right: none; }
-  .game-card.mini { flex: 1; opacity: .5; padding: 4px 3px; }
-  .game-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; }
-  .game-card.nfl::before { background: #4a7c59; } .game-card.nba-phi::before { background: #3a7ab0; }
-  .team-logo { width: 16px; height: 16px; object-fit: contain; border-radius: 50%; }
-  .game-card.mini .team-logo { width: 10px; height: 10px; }
-  .team-abbr { font-family: 'Archivo Black', sans-serif; font-size: 7px; line-height: 1; color: var(--warm); white-space: nowrap; }
-  .game-card.mini .team-abbr { font-size: 5px; }
-  .game-time { font-size: 5px; font-weight: 600; color: var(--warm); text-align: center; line-height: 1.3; white-space: pre-line; }
-  .game-time.live { color: var(--live); } .game-time.tbd { color: var(--muted); font-style: italic; }
-  .live-dot { display: inline-block; width: 4px; height: 4px; border-radius: 50%; background: var(--live); margin-right: 2px; animation: blink 1.2s infinite; vertical-align: middle; }
+  #sports { left: 560px; top: 632px; width: 712px; height: 160px; z-index: 115; }
+  #sports .card { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; width: 100%; height: 100%; overflow: hidden; display: flex; flex-direction: column; }
+  #sports .card-header { background: var(--bg2); border-bottom: 1px solid var(--border); padding: 4px 10px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+  #sports .card-title { font-family: 'Cinzel', serif; font-size: 11px; font-weight: 700; letter-spacing: 2px; color: var(--gold); }
+  .tiles { flex: 1; display: flex; min-height: 0; }
+  .tile { flex: 1; display: flex; flex-direction: column; border-right: 1px solid var(--border); min-width: 0; position: relative; }
+  .tile:last-child { border-right: none; }
+  .tile-top { display: flex; justify-content: space-between; align-items: center; padding: 3px 8px 2px; font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--border); background: var(--bg2); flex-shrink: 0; }
+  .tile-team { font-weight: 600; color: var(--warm); padding-left: 8px; position: relative; }
+  .tile-team::before { content: ''; position: absolute; left: 0; top: 1px; bottom: 1px; width: 3px; border-radius: 1px; background: var(--team); }
+  .tile-tag.live { color: var(--live); font-weight: 600; }
+  .tile-tag.won { color: #6fd38a; font-weight: 600; } .tile-tag.lost { color: #e07070; }
+  .tile-body { flex: 1; display: flex; align-items: center; justify-content: space-between; padding: 4px 8px; gap: 4px; min-height: 0; }
+  .side { display: flex; flex-direction: column; align-items: center; gap: 2px; width: 46px; flex-shrink: 0; }
+  .side .logo { width: 34px; height: 34px; object-fit: contain; }
+  .side .abbr { font-family: 'Archivo Black', sans-serif; font-size: 11px; color: var(--warm); line-height: 1; letter-spacing: .5px; }
+  .side .pts { font-family: 'Archivo Black', sans-serif; font-size: 22px; color: var(--warm); line-height: 1; }
+  .side.loser .pts, .side.loser .abbr { color: var(--muted); }
+  .mid { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-width: 0; text-align: center; }
+  .mid .lbl { font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
+  .mid .big { font-family: 'Cinzel', serif; font-weight: 700; font-size: 24px; line-height: 1; color: var(--gold); }
+  .mid .big.w { color: #6fd38a; } .mid .big.l { color: #e07070; }
+  .mid .big.live { color: var(--live); font-family: 'Archivo Black', sans-serif; font-size: 17px; white-space: nowrap; }
+  .mid .sub { font-size: 11px; color: var(--warm); line-height: 1.25; white-space: nowrap; }
+  .mid .sub.muted { color: var(--muted); font-size: 10px; }
+  .mid .when { font-family: 'Archivo Black', sans-serif; font-size: 14px; color: var(--warm); line-height: 1.1; white-space: nowrap; }
+  .mid .vs { font-size: 11px; color: var(--muted); letter-spacing: 1px; }
+  .tile.empty .mid .sub { color: var(--muted); font-style: italic; white-space: normal; }
+  .live-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--live); margin-right: 4px; animation: blink 1.2s infinite; vertical-align: middle; }
   @keyframes blink { 0%,100% { opacity: 1 } 50% { opacity: .3 } }
-  #sports .card-footer { background: var(--bg2); border-top: 1px solid var(--border); padding: 2px 8px; font-size: 5px; color: var(--muted); display: flex; justify-content: space-between; }
+  #sports .card-footer { background: var(--bg2); border-top: 1px solid var(--border); padding: 2px 10px; font-size: 7px; color: var(--muted); letter-spacing: 1px; display: flex; justify-content: space-between; flex-shrink: 0; }
 
-  /* ── WEATHER LAYER + NIGHT DIM ── */
+  /* ── WIN BANNER (bottom of the photo) ── */
+  #winbanner { left: 19px; top: 687px; width: 518px; height: 94px; z-index: 114; display: none; align-items: center; gap: 14px; padding: 0 18px; background: linear-gradient(90deg, var(--t1) 0%, rgba(0,0,0,.78) 100%); border-top: 3px solid var(--t2); }
+  #winbanner.on { display: flex; }
+  #winbanner img { width: 60px; height: 60px; object-fit: contain; filter: drop-shadow(0 2px 6px rgba(0,0,0,.6)); flex-shrink: 0; }
+  .win-head { font-family: 'Archivo Black', sans-serif; font-size: 30px; color: var(--t2); line-height: 1; letter-spacing: 1px; text-shadow: 0 2px 8px rgba(0,0,0,.5); white-space: nowrap; }
+  .win-sub { font-size: 15px; color: #fff; margin-top: 5px; text-shadow: 0 1px 4px rgba(0,0,0,.6); }
+
+  /* ── GATES & DOORS ── */
+  #chips { left: 36px; top: 36px; width: 484px; z-index: 150; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
+  .chip { align-self: flex-start; background: rgba(30,14,14,.9); border: 1.5px solid #e8a060; border-radius: 20px; padding: 6px 14px; font-size: 15px; font-weight: 600; color: #ffd9a8; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 10px rgba(0,0,0,.5); white-space: nowrap; }
+  .chip b { color: #ffb070; }
+  #gate { left: 0; top: 0; width: 1280px; height: 800px; z-index: 300; display: none; align-items: center; justify-content: center; background: rgba(0,0,0,.6); }
+  #gate.on { display: flex; }
+  .gate-box { position: relative; width: 1160px; height: 680px; border: 8px solid #ffd0d0; border-radius: 28px; background: #6e0808; overflow: hidden; }
+  .gate-box::before { content: ''; position: absolute; inset: 0; background: #d42020; animation: gatePulse 1s ease-in-out infinite; }
+  @keyframes gatePulse { 0%, 100% { opacity: 0; } 50% { opacity: 1; } }
+  .gate-inner { position: relative; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; text-align: center; color: #fff; }
+  .gate-head { font-family: 'Archivo Black', sans-serif; font-size: 88px; line-height: 1; letter-spacing: 4px; text-shadow: 0 4px 24px rgba(0,0,0,.5); }
+  .gate-item { margin-top: 8px; }
+  .gate-name { font-family: 'Cinzel', serif; font-weight: 700; font-size: 56px; line-height: 1.1; }
+  .gate-since { font-weight: 600; font-size: 30px; color: #ffe0e0; margin-top: 4px; }
+  .gate-foot { font-size: 18px; letter-spacing: 3px; text-transform: uppercase; color: #ffc9c9; margin-top: 14px; }
+
+  /* ── WEATHER / AMBIENT LAYER + NIGHT DIM ── */
   #fx { left: 0; top: 0; width: 1280px; height: 800px; pointer-events: none; z-index: 120; }
   #dim { left: 0; top: 0; width: 1280px; height: 800px; background: #000; opacity: 0; pointer-events: none; z-index: 200; transition: opacity 3s; }
 </style>
@@ -155,10 +194,12 @@
 <body>
 <div id="stage">
   <div class="block" id="photo"><div class="empty"></div><div class="vignette"></div></div>
+  <div class="block" id="winbanner"><img id="win-logo" alt=""><div><div class="win-head" id="win-head"></div><div class="win-sub" id="win-sub"></div></div></div>
   <div class="block" id="frame">
     <div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div>
     <div class="fgem top"></div><div class="fgem bottom"></div><div class="fgem left"></div><div class="fgem right"></div>
   </div>
+  <div class="block" id="chips"></div>
 
   <div class="block" id="clockw">
     <div class="wrap">
@@ -218,13 +259,21 @@
   <div class="block" id="sports">
     <div class="card">
       <div class="card-header"><div class="gem"></div><div class="card-title" id="sports-title">Next Games</div><div class="gem"></div></div>
-      <div class="games-row" id="games-row"></div>
-      <div class="card-footer"><span id="s-updated">Updating every 5 min</span><span>ESPN</span></div>
+      <div class="tiles" id="tiles"><div class="tile empty"><div class="tile-body"><div class="mid"><div class="sub">Loading schedules…</div></div></div></div></div>
+      <div class="card-footer"><span id="s-updated">Schedules every 5 min · live scores every 60 s</span><span>ESPN</span></div>
     </div>
   </div>
 
   <canvas class="block" id="fx" width="1280" height="800"></canvas>
   <div class="block" id="dim"></div>
+
+  <div class="block" id="gate">
+    <div class="gate-box"><div class="gate-inner">
+      <div class="gate-head">⚠ GATE OPEN</div>
+      <div class="gate-list" id="gate-list"></div>
+      <div class="gate-foot">Please close the gate</div>
+    </div></div>
+  </div>
 </div>
 
 <script>
@@ -233,7 +282,14 @@
   var CFG = window.DASH_CONFIG || {};
   var LOC = CFG.lounge || { lat: 41.685, lon: -73.733 };
   var TZ = CFG.timezone || 'America/New_York';
-  var W = 1280, H = 800;
+  var W = 1280, H = 800, HOUR = 3600000, DAY = 86400000;
+
+  /* ── ?test= previews ──  e.g. lounge.html?test=gate  or  ?test=win:nyj,season:halloween,night,live,fireworks
+     gate · win[:ABBR] · live · season:NAME · night · fireworks · dim:0.5 */
+  var TEST = {};
+  (new URLSearchParams(location.search).get('test') || '').split(',').forEach(function (s) {
+    if (!s) return; var i = s.indexOf(':'); TEST[i < 0 ? s : s.slice(0, i)] = i < 0 ? true : s.slice(i + 1);
+  });
 
   /* ── Fit the 1280×800 board to the screen (Fire Stick reports 960×540) ── */
   function fit() {
@@ -253,14 +309,22 @@
     return Date.UTC(+p.year, +p.month - 1, +p.day, (+p.hour) % 24, +p.minute, +p.second);
   }
   function nowWall() { return wallOf(new Date()); }
-  var DAY = 86400000;
   function dayStart(w) { var d = new Date(w); return Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()); }
   var DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
   var DOW3 = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   var MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   var MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
   function clock12(w) { var d = new Date(w), h = d.getUTCHours(), m = d.getUTCMinutes(); return (h % 12 || 12) + (m ? ':' + String(m).padStart(2, '0') : '') + (h < 12 ? 'am' : 'pm'); }
-  function updatedStamp() { var d = new Date(nowWall()), h = d.getUTCHours(); return 'Updated ' + (h % 12 || 12) + ':' + String(d.getUTCMinutes()).padStart(2, '0') + ' ' + (h < 12 ? 'AM' : 'PM'); }
+  function clockFull(w) { var d = new Date(w), h = d.getUTCHours(); return (h % 12 || 12) + ':' + String(d.getUTCMinutes()).padStart(2, '0') + ' ' + (h < 12 ? 'AM' : 'PM'); }
+  function updatedStamp() { return 'Updated ' + clockFull(nowWall()); }
+  function dayLabel(w) {
+    var today = dayStart(nowWall()), d = dayStart(w), dt = new Date(w);
+    if (d === today) return 'Today'; if (d === today + DAY) return 'Tomorrow'; if (d === today - DAY) return 'Yesterday';
+    return DOW3[dt.getUTCDay()] + ' ' + MON[dt.getUTCMonth()] + ' ' + dt.getUTCDate();
+  }
+  function ymd(w) { var d = new Date(w); return d.getUTCFullYear() + String(d.getUTCMonth() + 1).padStart(2, '0') + String(d.getUTCDate()).padStart(2, '0'); }
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function clamp(v, a, b) { return v < a ? a : (v > b ? b : v); }
 
   /* ── Clock ── */
   function tick() {
@@ -303,9 +367,10 @@
   var sun = null, wx = { code: 0, isDay: 1 };
   function minsOf(iso) { var t = iso.split('T')[1].split(':'); return (+t[0]) * 60 + (+t[1]); }
   function fmtSun(iso) { var m = minsOf(iso), h = Math.floor(m / 60); return (h % 12 || 12) + ':' + String(m % 60).padStart(2, '0') + ' ' + (h < 12 ? 'am' : 'pm'); }
+  function nowMins() { var d = new Date(nowWall()); return d.getUTCHours() * 60 + d.getUTCMinutes(); }
   function updateSunBar() {
     if (!sun) return;
-    var d = new Date(nowWall()), now = d.getUTCHours() * 60 + d.getUTCMinutes(), rise = minsOf(sun.rise), set = minsOf(sun.set);
+    var now = nowMins(), rise = minsOf(sun.rise), set = minsOf(sun.set);
     var pct = Math.max(0, Math.min(1, (now - rise) / (set - rise)));
     document.getElementById('sun-fill').style.width = (pct * 100) + '%';
     document.getElementById('sun-dot').style.left = (pct * 100) + '%';
@@ -339,15 +404,15 @@
       }
       document.getElementById('forecast-row').innerHTML = html;
       document.getElementById('w-updated').textContent = updatedStamp();
-      updateSunBar(); fx.setCondition(wx);
+      updateSunBar(); updateDim(); fx.setCondition(wx); applyTheme();
     }).catch(function () { document.getElementById('cur-cond').textContent = 'Unavailable'; });
   }
 
-  /* ── Data feed (one small Google Apps Script feed: next 3 weeks, concerts, photo links) ── */
+  /* ── Data feed (one small Google Apps Script feed: next 3 weeks, concerts, photo links, sensors) ── */
   function wallParse(s) {   // "2026-11-16T19:00:00" (New York time) → wall ms
     var p = s.split(/[-T:]/).map(Number); return Date.UTC(p[0], p[1] - 1, p[2], p[3] || 0, p[4] || 0, p[5] || 0);
   }
-  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function feedUrl(q) { return CFG.feed + (CFG.feed.indexOf('?') >= 0 ? '&' : '?') + q; }
 
   /* ── Upcoming Events ── */
   var CALS = { main: 'cal-main', household: 'cal-household', dinner: 'cal-dinner' }, NUM_DAYS = 21;
@@ -414,43 +479,256 @@
     });
   }
 
-  /* ── Sports ── */
-  var TEAMS = CFG.teams || [];
-  document.getElementById('sports-title').textContent = CFG.sportsTitle || 'Next Games';
-  function gameTime(w) {
-    var today = dayStart(nowWall()), d = dayStart(w), dt = new Date(w), h = dt.getUTCHours(), m = dt.getUTCMinutes();
-    var t = (h % 12 || 12) + ':' + String(m).padStart(2, '0') + ' ' + (h < 12 ? 'AM' : 'PM');
-    if (d === today) return 'Today\n' + t; if (d === today + DAY) return 'Tomorrow\n' + t;
-    return DOW3[dt.getUTCDay()] + ' ' + MON[dt.getUTCMonth()] + ' ' + dt.getUTCDate() + '\n' + t;
+  /* ── Gates & doors (SharpTools → feed ?sensor=…&state=… → here, polled every 20 s) ── */
+  function durText(mins) { return mins < 60 ? mins + ' min' : Math.floor(mins / 60) + ' h ' + (mins % 60) + ' min'; }
+  function renderSensors(list) {
+    var now = nowWall(), open = (list || []).filter(function (s) { return s.open; });
+    var gates = open.filter(function (s) { return s.kind === 'gate'; }), others = open.filter(function (s) { return s.kind !== 'gate'; });
+    var gate = document.getElementById('gate');
+    if (gates.length) {
+      document.getElementById('gate-list').innerHTML = gates.map(function (s) {
+        var w = s.since ? wallParse(s.since) : now, mins = Math.max(0, Math.round((now - w) / 60000));
+        return '<div class="gate-item"><div class="gate-name">' + esc(s.name) + '</div><div class="gate-since">open since ' + clockFull(w).toLowerCase() + ' (' + durText(mins) + ')</div></div>';
+      }).join('');
+      gate.classList.add('on');
+    } else gate.classList.remove('on');
+    document.getElementById('chips').innerHTML = others.map(function (s) {
+      var w = s.since ? wallParse(s.since) : now, mins = Math.max(0, Math.round((now - w) / 60000));
+      return '<div class="chip">' + (s.kind === 'garage' ? '🚗' : '🚪') + ' ' + esc(s.name) + ' <b>open</b> · ' + durText(mins) + '</div>';
+    }).join('');
   }
+  function fetchSensors() {
+    if (TEST.gate) {
+      var n = nowWall(), f = function (w) { var d = new Date(w); return d.toISOString().slice(0, 19); };
+      renderSensors([{ name: 'Driveway Gate', kind: 'gate', open: true, since: f(n - 12 * 60000) }, { name: 'Left Garage Door', kind: 'garage', open: true, since: f(n - 3 * 60000) },
+        { name: 'Solarium Gate', kind: 'gate', open: false, since: f(n - 90 * 60000) }]);
+      return;
+    }
+    if (!CFG.feed) return;
+    fetch(feedUrl('part=sensors'), { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (j) { renderSensors(j.sensors); }).catch(function () {});
+  }
+
+  /* ── Sports: schedules (5 min) + live scoreboard (60 s during games) ── */
+  var TEAM_COLORS = { nfl: ['#125740', '#ffffff'], 'nba-phi': ['#006BB6', '#ED174C'] };
+  var TEAMS = (CFG.teams || []).map(function (t) { t.colors = t.colors || TEAM_COLORS[t.cls] || ['#c9954a', '#f0d4a8']; return t; });
+  var sched = {};                       // team.abbr → every game ESPN lists for the season, finals included
+  var finals = {};                      // eventId → wall ms when this screen saw the game go final
+  try { finals = JSON.parse(localStorage.getItem('lounge-finals') || '{}'); } catch (e) { finals = {}; }
+  function saveFinals() { try { localStorage.setItem('lounge-finals', JSON.stringify(finals)); } catch (e) {} }
+  document.getElementById('sports-title').textContent = CFG.sportsTitle || 'Next Games';
+
+  function scoreOf(s) { if (s == null) return null; if (typeof s === 'object') return s.displayValue != null ? s.displayValue : s.value; return s; }
+  function parseGame(team, e) {
+    var comp = (e.competitions || [])[0] || {}, us = null, them = null;
+    (comp.competitors || []).forEach(function (c) { if (c.team && c.team.abbreviation === team.abbr) us = c; else them = c; });
+    if (!us || !them) return null;
+    var st = comp.status || e.status || {}, ty = st.type || {}, tm = them.team || {};
+    var sit = comp.situation || {};
+    return {
+      id: String(e.id), team: team, when: wallOf(new Date(e.date)), tbd: e.timeValid === false || comp.timeValid === false, home: us.homeAway === 'home',
+      opp: tm.abbreviation || '?', oppName: tm.shortDisplayName || tm.displayName || tm.abbreviation || '',
+      oppLogo: (tm.logos && tm.logos[0] && tm.logos[0].href) || tm.logo || ('https://a.espncdn.com/i/teamlogos/' + team.league + '/500/' + String(tm.abbreviation || '').toLowerCase() + '.png'),
+      us: scoreOf(us.score), them: scoreOf(them.score), won: us.winner === true, lost: them.winner === true,
+      state: ty.state || (ty.completed ? 'post' : 'pre'), completed: !!ty.completed, status: ty.name || '', clock: st.displayClock || '', period: st.period || 0,
+      sit: sit.shortDownDistanceText || sit.downDistanceText || null
+    };
+  }
+  function noteFinal(g) { if (g.completed && !finals[g.id]) { finals[g.id] = g.when + (g.team.league === 'nfl' ? 3.25 : 2.5) * HOUR; if (finals[g.id] > nowWall()) finals[g.id] = nowWall(); saveFinals(); } }
   function fetchTeam(team) {
     var url = 'https://site.api.espn.com/apis/site/v2/sports/' + team.sport + '/' + team.league + '/teams/' + team.espnId + '/schedule';
     return fetch(url).then(function (r) { return r.json(); }).then(function (j) {
-      return (j.events || []).map(function (e) {
-        var comp = (e.competitions || [])[0] || {}, st = (comp.status || e.status || {}).type || {};
-        var us = null, them = null; (comp.competitors || []).forEach(function (c) { var ab = c.team && c.team.abbreviation; if (ab === team.abbr) us = c; else them = c; });
-        if (!us || !them) return null;
-        var score = function (c) { return c.score && (c.score.displayValue || c.score.value || c.score); };
-        return { team: team, when: wallOf(new Date(e.date)), completed: !!st.completed, live: st.name === 'STATUS_IN_PROGRESS' || st.name === 'STATUS_HALFTIME',
-          tbd: !!(e.timeValid === false), home: us.homeAway === 'home', opp: them.team.abbreviation, oppLogo: them.team.logos && them.team.logos[0] && them.team.logos[0].href,
-          usScore: score(us), themScore: score(them) };
-      }).filter(function (g) { return g && !g.completed; });
-    }).catch(function () { return []; });
+      var list = (j.events || []).map(function (e) { return parseGame(team, e); }).filter(Boolean).sort(function (a, b) { return a.when - b.when; });
+      if (list.length) {
+        var old = sched[team.abbr] || [];
+        list.forEach(function (g) {                       // keep live details a schedule refresh does not carry
+          var o = old.filter(function (x) { return x.id === g.id; })[0];
+          if (o && o.state === 'in' && g.state === 'pre') { g.state = o.state; g.us = o.us; g.them = o.them; g.clock = o.clock; g.period = o.period; g.status = o.status; g.sit = o.sit; }
+          noteFinal(g);
+        });
+        sched[team.abbr] = list;
+      }
+    }).catch(function () {});
   }
+  function nextGame(team) { return (sched[team.abbr] || []).filter(function (g) { return !g.completed; })[0] || null; }
+  function lastGame(team) { var done = (sched[team.abbr] || []).filter(function (g) { return g.completed; }); return done.length ? done[done.length - 1] : null; }
   function fetchGames() {
-    Promise.all(TEAMS.map(fetchTeam)).then(function (lists) {
-      var games = [].concat.apply([], lists).sort(function (a, b) { return a.when - b.when; }).slice(0, 6);
-      var row = document.getElementById('games-row');
-      if (!games.length) { row.innerHTML = '<div class="game-card"><div class="game-time tbd">Offseason</div></div>'; return; }
-      row.innerHTML = games.map(function (g, i) {
-        var logo = 'https://a.espncdn.com/i/teamlogos/' + g.team.league + '/500/' + g.team.abbr.toLowerCase() + '.png';
-        var vs = (g.home ? 'vs ' : '@ ') + g.opp;
-        var time = g.live ? '<span class="live-dot"></span>LIVE ' + (g.usScore || 0) + '–' + (g.themScore || 0) : (g.tbd ? 'TBD' : gameTime(g.when));
-        return '<div class="game-card ' + g.team.cls + (i >= 5 ? ' mini' : '') + '"><img class="team-logo" src="' + logo + '" onerror="this.style.visibility=\'hidden\'">' +
-          '<div class="team-abbr">' + g.team.abbr + '</div><div class="game-vs">' + vs + '</div><div class="game-time' + (g.live ? ' live' : (g.tbd ? ' tbd' : '')) + '">' + time + '</div></div>';
-      }).join('');
-      document.getElementById('s-updated').textContent = updatedStamp();
+    Promise.all(TEAMS.map(fetchTeam)).then(function () {
+      if (TEST.live && TEAMS[0]) {
+        var g = nextGame(TEAMS[0]) || { id: 'test-live', team: TEAMS[0], when: nowWall() - HOUR, home: true, opp: 'BUF', oppName: 'Bills', oppLogo: 'https://a.espncdn.com/i/teamlogos/nfl/500/buf.png' };
+        g.state = 'in'; g.status = 'STATUS_IN_PROGRESS'; g.us = '17'; g.them = '14'; g.clock = '5:32'; g.period = 3; g.sit = '2nd & 7';
+        if (g.id === 'test-live') sched[TEAMS[0].abbr] = (sched[TEAMS[0].abbr] || []).concat([g]);
+      }
+      renderSports(); applyTheme(); pollLive();
     });
+  }
+  function activeGames() {
+    var now = nowWall();
+    return TEAMS.map(nextGame).filter(function (g) { return g && now >= g.when - 15 * 60000 && now < g.when + 6 * HOUR; });
+  }
+  function pollLive() {
+    if (TEST.live) return;
+    var act = activeGames(), groups = {};
+    act.forEach(function (g) { var k = g.team.sport + '/' + g.team.league + '/' + ymd(g.when); (groups[k] = groups[k] || []).push(g); });
+    Object.keys(groups).forEach(function (k) {
+      var p = k.split('/');
+      fetch('https://site.api.espn.com/apis/site/v2/sports/' + p[0] + '/' + p[1] + '/scoreboard?dates=' + p[2], { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (j) {
+        var changed = false;
+        (j.events || []).forEach(function (e) {
+          groups[k].forEach(function (g) {
+            if (String(e.id) !== g.id) return;
+            var n = parseGame(g.team, e); if (!n) return;
+            ['state', 'completed', 'status', 'clock', 'period', 'us', 'them', 'won', 'lost', 'sit'].forEach(function (f) { g[f] = n[f]; });
+            if (g.completed && !finals[g.id]) { finals[g.id] = nowWall(); saveFinals(); }
+            changed = true;
+          });
+        });
+        if (changed) { renderSports(); applyTheme(); }
+      }).catch(function () {});
+    });
+  }
+  function periodLabel(g) {
+    var p = g.period, q = p <= 4 ? 'Q' + p : (p === 5 ? 'OT' : (p - 4) + 'OT');
+    if (g.status === 'STATUS_HALFTIME') return 'HALF';
+    if (g.status === 'STATUS_END_PERIOD') return 'END ' + q;
+    if (g.status === 'STATUS_DELAYED') return 'DELAYED';
+    return q + (g.clock ? ' ' + g.clock : '');
+  }
+  function sideHtml(logo, abbr, pts, loser) {
+    return '<div class="side' + (loser ? ' loser' : '') + '"><img class="logo" src="' + esc(logo) + '" onerror="this.style.visibility=\'hidden\'">' +
+      '<div class="abbr">' + esc(abbr) + '</div>' + (pts != null ? '<div class="pts">' + esc(pts) + '</div>' : '') + '</div>';
+  }
+  function tileHtml(team, g, kind) {
+    var logo = 'https://a.espncdn.com/i/teamlogos/' + team.league + '/500/' + team.abbr.toLowerCase() + '.png';
+    var head = '<div class="tile-top"><span class="tile-team" style="--team:' + team.colors[0] + '">' + esc(team.name) + '</span>';
+    if (!g) {
+      return '<div class="tile empty">' + head + '<span class="tile-tag">' + (kind === 'last' ? 'Last' : 'Next') + '</span></div><div class="tile-body"><div class="mid"><div class="sub">' +
+        (kind === 'last' ? 'No results yet this season' : 'No games scheduled') + '</div></div></div></div>';
+    }
+    var us = g.home ? sideHtml(logo, team.abbr, g.us, g.lost) : null, them = sideHtml(g.oppLogo, g.opp, g.them, g.won), mine = us || sideHtml(logo, team.abbr, g.us, g.lost);
+    var left = g.home ? them : mine, right = g.home ? mine : them, mid;
+    if (g.state === 'in') {
+      head += '<span class="tile-tag live"><span class="live-dot"></span>Live</span></div>';
+      mid = '<div class="lbl">' + (g.home ? 'vs ' : 'at ') + esc(g.opp) + '</div><div class="big live">' + esc(periodLabel(g)) + '</div><div class="sub muted">' + esc(g.sit || (g.team.league === 'nfl' ? 'NFL' : 'NBA')) + '</div>';
+    } else if (g.completed) {
+      var res = g.won ? 'W' : (g.lost ? 'L' : 'T');
+      head += '<span class="tile-tag ' + (g.won ? 'won' : 'lost') + '">' + (g.won ? 'Win' : 'Final') + '</span></div>';
+      mid = '<div class="lbl">Final' + (g.period > 4 ? '/OT' : '') + '</div><div class="big ' + res.toLowerCase() + '">' + res + '</div><div class="sub muted">' + dayLabel(g.when) + '</div>';
+    } else {
+      head += '<span class="tile-tag">Next</span></div>';
+      var when = g.tbd ? 'Time TBD' : clockFull(g.when);
+      if (g.status === 'STATUS_POSTPONED') when = 'Postponed';
+      mid = '<div class="vs">' + (g.home ? 'vs' : 'at') + '</div><div class="sub">' + dayLabel(g.when) + '</div><div class="when">' + esc(when) + '</div>';
+    }
+    return '<div class="tile">' + head + '<div class="tile-body">' + left + '<div class="mid">' + mid + '</div>' + right + '</div></div>';
+  }
+  function renderSports() {
+    var tiles = [];
+    TEAMS.forEach(function (t) { tiles.push(tileHtml(t, lastGame(t), 'last'), tileHtml(t, nextGame(t), 'next')); });
+    document.getElementById('tiles').innerHTML = tiles.join('') || '<div class="tile empty"><div class="tile-body"><div class="mid"><div class="sub">No teams in config.js</div></div></div></div>';
+    document.getElementById('s-updated').textContent = updatedStamp() + (activeGames().length ? ' · live every 60 s' : ' · schedules every 5 min');
+  }
+
+  /* ── Win celebration: team colors + banner + confetti for ~18 h after a final ── */
+  var CELEBRATE_MS = 18 * HOUR;
+  function currentWin() {
+    if (TEST.win) {
+      var t = TEAMS.filter(function (x) { return TEST.win === true || x.abbr.toLowerCase() === String(TEST.win).toLowerCase(); })[0] || TEAMS[0];
+      return t ? { team: t, us: '27', them: '20', home: true, oppName: t.league === 'nfl' ? 'Bills' : 'Celtics', when: nowWall() - 3 * HOUR } : null;
+    }
+    var now = nowWall(), best = null;
+    TEAMS.forEach(function (t) {
+      (sched[t.abbr] || []).forEach(function (g) {
+        if (!g.completed || !g.won) return;
+        var ft = finals[g.id] || (g.when + 3 * HOUR);
+        if (now < ft + CELEBRATE_MS && (!best || ft > best.ft)) best = { team: t, us: g.us, them: g.them, home: g.home, oppName: g.oppName, when: g.when, ft: ft };
+      });
+    });
+    return best;
+  }
+
+  /* ── Palette (seasonal accents / team colors) ── */
+  var BASE_PAL = { gold: '#c9954a', 'gold-dim': '#6b4d27', hi: '#f5c97a', frame: '#c9954a', border: '#3d2a38', 'border-today': '#6b3a52', bg: '#1a1118', bg2: '#221620', 'bg-today': '#2a1a24' };
+  var SEASON_PAL = {
+    autumn: { gold: '#d4883a', hi: '#f0a85a', frame: '#c67f3a', 'gold-dim': '#7a4a22' },
+    halloween: { gold: '#e8792a', hi: '#ffa14d', frame: '#d86f28', 'gold-dim': '#6a3fa0', border: '#4a2a4d', 'border-today': '#7a4a8a', 'bg-today': '#2a1a30' },
+    thanksgiving: { gold: '#c97a3a', hi: '#f0b070', frame: '#b86d33', 'gold-dim': '#8a4a22' },
+    december: { gold: '#d8604f', hi: '#f5c97a', frame: '#c9954a', 'gold-dim': '#3f9b63', border: '#3d2a30', 'border-today': '#7a3a3a', 'bg-today': '#2a1a1c' },
+    newyear: { gold: '#e6c86e', hi: '#fff1b8', frame: '#e6c86e', 'gold-dim': '#8a7a3a' },
+    winter: { gold: '#9ec3e6', hi: '#d8ecff', frame: '#8ab4d8', 'gold-dim': '#3a5a7a', border: '#2d3a4d', 'border-today': '#4a6a8a', bg: '#141620', bg2: '#1a1e2c', 'bg-today': '#1e2638' },
+    valentine: { gold: '#e0607e', hi: '#ffb3c6', frame: '#d4567a', 'gold-dim': '#7a2a40', 'border-today': '#8a3a55' },
+    stpatrick: { gold: '#4fb36f', hi: '#9ee0b0', frame: '#4aa868', 'gold-dim': '#2a6a40', 'border-today': '#3a7a50' },
+    spring: { gold: '#e39ab8', hi: '#ffd1e0', frame: '#d88aa8', 'gold-dim': '#7fc48c' },
+    summer: { gold: '#e3b04b', hi: '#ffe08a', frame: '#d9a640', 'gold-dim': '#7a6a2a' },
+    july4: { gold: '#e05a5a', hi: '#ffffff', frame: '#d0d8e8', 'gold-dim': '#4f7fd0', border: '#3a2a3a', 'border-today': '#6a4a6a' }
+  };
+  function hex2rgb(h) { h = h.replace('#', ''); if (h.length === 3) h = h.replace(/./g, function (c) { return c + c; }); return [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)]; }
+  function mix(a, b, t) {   // t = 0 → a, t = 1 → b
+    var x = hex2rgb(a), y = hex2rgb(b);
+    return '#' + x.map(function (c, i) { return ('0' + Math.round(c + (y[i] - c) * t).toString(16)).slice(-2); }).join('');
+  }
+  function lum(h) { var c = hex2rgb(h); return (c[0] * 299 + c[1] * 587 + c[2] * 114) / 255000; }
+  function winPalette(team) {
+    var p = team.colors[0], s = team.colors[1], accent = lum(s) > 0.85 ? '#f2f6f3' : s;
+    return { gold: accent, 'gold-dim': accent, hi: mix(accent, '#ffffff', 0.4), frame: accent, border: p, 'border-today': mix(p, '#ffffff', 0.3),
+      bg: mix(p, '#000000', 0.66), bg2: mix(p, '#000000', 0.58), 'bg-today': mix(p, '#000000', 0.48) };
+  }
+  var curPalKey = '';
+  function setPalette(pal) {
+    var key = JSON.stringify(pal); if (key === curPalKey) return; curPalKey = key;
+    var st = document.getElementById('stage').style;
+    Object.keys(pal).forEach(function (k) { st.setProperty('--' + k, pal[k]); });
+  }
+
+  /* ── Seasons by New York date ── */
+  function seasonOf(w) {
+    var d = new Date(w), m = d.getUTCMonth(), day = d.getUTCDate(), y = d.getUTCFullYear();
+    if (m === 10) { var first = new Date(Date.UTC(y, 10, 1)).getUTCDay(), thanks = 22 + ((4 - first + 7) % 7); if (day >= thanks - 3 && day <= thanks + 2) return 'thanksgiving'; }
+    if (m === 9 && day >= 24) return 'halloween';
+    if ((m === 8 && day >= 22) || m === 9 || m === 10) return 'autumn';
+    if (m === 11 && day <= 26) return 'december';
+    if ((m === 11 && day >= 27) || (m === 0 && day === 1)) return 'newyear';
+    if (m === 0 || (m === 1 && day <= 6)) return 'winter';
+    if (m === 1 && day <= 14) return 'valentine';
+    if (m === 1 || (m === 2 && day <= 13)) return 'winter';
+    if (m === 2 && day <= 17) return 'stpatrick';
+    if (m === 2 || m === 3 || m === 4) return 'spring';
+    if (m === 6 && day === 4) return 'july4';
+    return 'summer';
+  }
+  function ambientFor(season, night) {
+    switch (season) {
+      case 'autumn': return 'leaves'; case 'halloween': return night ? 'bats' : 'leaves'; case 'thanksgiving': return 'leaves-slow';
+      case 'december': return 'december'; case 'newyear': return 'newyear'; case 'winter': return 'frost';
+      case 'valentine': return 'hearts'; case 'stpatrick': return 'shamrocks'; case 'spring': return 'petals';
+      case 'summer': case 'july4': return night ? 'fireflies' : null;
+    }
+    return null;
+  }
+  function fireworksNow(w, night) {
+    if (TEST.fireworks) return 'newyear';
+    var d = new Date(w), m = d.getUTCMonth(), day = d.getUTCDate(), mins = d.getUTCHours() * 60 + d.getUTCMinutes();
+    if (m === 0 && day === 1 && mins < 20) return 'newyear';
+    if (m === 6 && day === 4 && night && mins >= 20 * 60) return 'july4';
+    if (m === 6 && day === 5 && mins < 30) return 'july4';
+    return null;
+  }
+  function applyTheme() {
+    var now = nowWall(), night = TEST.night ? true : !wx.isDay, season = TEST.season || seasonOf(now), win = currentWin();
+    var pal = {}; Object.keys(BASE_PAL).forEach(function (k) { pal[k] = BASE_PAL[k]; });
+    var sp = SEASON_PAL[season] || {}; Object.keys(sp).forEach(function (k) { pal[k] = sp[k]; });
+    if (win) pal = winPalette(win.team);
+    setPalette(pal);
+    var banner = document.getElementById('winbanner');
+    if (win) {
+      banner.style.setProperty('--t1', win.team.colors[0]); banner.style.setProperty('--t2', lum(win.team.colors[1]) > 0.85 ? '#ffffff' : win.team.colors[1]);
+      document.getElementById('win-logo').src = 'https://a.espncdn.com/i/teamlogos/' + win.team.league + '/500-dark/' + win.team.abbr.toLowerCase() + '.png';
+      document.getElementById('win-head').textContent = win.team.name.toUpperCase() + ' WIN!';
+      document.getElementById('win-sub').textContent = (win.us != null ? win.us + '–' + win.them + ' ' : '') + (win.home ? 'over ' : 'at ') + win.oppName + ' · ' + dayLabel(win.when);
+      banner.classList.add('on');
+    } else banner.classList.remove('on');
+    fx.setAmbient(ambientFor(season, night), pal);
+    fx.setFireworks(fireworksNow(now, night), pal);
+    fx.setConfetti(win ? win.team.colors : null);
   }
 
   /* ── Photos ── */
@@ -480,20 +758,38 @@
     show(); setInterval(show, everySec * 1000);
   }
 
-  /* ── Night dim (22:45 → 06:30 by default) ── */
+  /* ── Sun-based dimming ──
+     Full brightness by day. After sunset a gentle dim eases in over ~45 min, the deep dim
+     starts at nightDim.deepStart (22:45), and the screen is back to full around sunrise. */
+  function dimLevel(now, rise, set) {
+    var nd = CFG.nightDim || {};
+    if (nd.enabled === false) return 0;
+    var toM = function (s) { var p = String(s).split(':'); return (+p[0]) * 60 + (+p[1] || 0); };
+    var deepStart = toM(nd.deepStart || nd.start || '22:45'), deep = nd.deepOpacity != null ? nd.deepOpacity : (nd.opacity != null ? nd.opacity : 0.81);
+    var dusk = nd.duskOpacity != null ? nd.duskOpacity : 0.25, ramp = nd.duskMinutes || 45, wake = nd.wakeMinutes || 30;
+    if (rise == null || set == null) {                        // no sun yet: the old fixed schedule
+      var b = toM(nd.end || '06:30'), on = deepStart > b ? (now >= deepStart || now < b) : (now >= deepStart && now < b);
+      return on ? deep : 0;
+    }
+    var t = now < rise ? now + 1440 : now;                    // one timeline from this sunrise to the next
+    var deepT = deepStart < rise ? deepStart + 1440 : deepStart, riseT = rise + 1440, level = 0;
+    if (t >= set) level = dusk * clamp((t - set) / ramp, 0, 1);
+    if (t >= deepT) level = Math.max(level, dusk + (deep - dusk) * clamp((t - deepT) / 10, 0, 1));
+    level *= clamp((riseT - t) / wake, 0, 1);                 // ease back to full before sunrise
+    return Math.round(level * 1000) / 1000;
+  }
   function updateDim() {
-    var nd = CFG.nightDim || {}, el = document.getElementById('dim');
-    if (!nd.enabled) { el.style.opacity = 0; return; }
-    var d = new Date(nowWall()), now = d.getUTCHours() * 60 + d.getUTCMinutes();
-    var toM = function (s) { var p = s.split(':'); return (+p[0]) * 60 + (+p[1]); }, a = toM(nd.start || '22:45'), b = toM(nd.end || '06:30');
-    var on = a > b ? (now >= a || now < b) : (now >= a && now < b);
-    el.style.opacity = on ? (nd.opacity || 0.81) : 0;
+    var el = document.getElementById('dim');
+    if (TEST.dim) { el.style.opacity = +TEST.dim; return; }
+    el.style.opacity = dimLevel(nowMins(), sun ? minsOf(sun.rise) : null, sun ? minsOf(sun.set) : null);
   }
 
-  /* ── Weather layer (rain, snow, fog, clouds, stars, lightning) ── */
+  /* ── Canvas layer: weather (rain, snow, fog, clouds, stars, lightning) + seasonal ambience + celebrations ── */
   var fx = (function () {
     var cv = document.getElementById('fx'), ctx = cv.getContext('2d'), parts = [], mode = 'clear-day', flash = 0, nextBolt = 0, shoot = null, lastT = 0, on = CFG.weatherEffects !== false;
+    var amb = { kind: null, parts: [], lights: [], frost: null, pal: BASE_PAL }, fw = { kind: null, sparks: [], next: 0 }, cf = { colors: null, bits: [], next: 0 };
     function rnd(a, b) { return a + Math.random() * (b - a); }
+    function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
     function modeOf(w) {
       var c = w.code, day = w.isDay;
       if (c === 0 || c === 1) return day ? 'clear-day' : 'clear-night';
@@ -521,6 +817,123 @@
       if (/snow/.test(mode)) add(mode === 'heavy-snow' ? 220 : 120, function () { return { k: 'snow', x: rnd(0, W), y: rnd(-H, H), r: rnd(1, 3.2), v: rnd(28, 70), p: rnd(0, 6.28), dx: wind * 60, a: rnd(0.45, 0.85) }; });
       if (mode === 'hail-storm') add(50, function () { return { k: 'hail', x: rnd(0, W), y: rnd(-H, H), r: rnd(1.4, 2.4), v: rnd(600, 800), a: rnd(0.5, 0.8) }; });
     }
+
+    /* seasonal ambience: small particle counts so the Fire Stick stays comfortable */
+    var LEAF = ['#c8641e', '#d8882a', '#a63d1a', '#e0a040', '#8a4a1a'], PETAL = ['#f6c1d3', '#fde2ea', '#ffffff', '#f3a7c0'], BULB = ['#ff4a4a', '#4ade80', '#ffd166', '#60a5fa', '#f472b6'];
+    function buildAmbient() {
+      var A = amb.parts = [], k = amb.kind; amb.lights = []; amb.frost = null;
+      var add = function (n, f) { for (var i = 0; i < n; i++) A.push(f()); };
+      if (k === 'leaves' || k === 'leaves-slow') add(k === 'leaves' ? 14 : 9, function () { return { k: 'leaf', x: rnd(0, W), y: rnd(-H, H), r: rnd(6, 11), vx: rnd(10, 30), vy: k === 'leaves' ? rnd(22, 45) : rnd(14, 28), rot: rnd(0, 6.28), vr: rnd(-1.5, 1.5), p: rnd(0, 6.28), c: pick(LEAF) }; });
+      if (k === 'bats') add(7, function () { var dir = Math.random() < 0.5 ? 1 : -1; return { k: 'bat', x: rnd(0, W), y: rnd(30, H * 0.6), vx: dir * rnd(45, 90), vy: rnd(-12, 12), s: rnd(10, 17), f: rnd(6, 10), p: rnd(0, 6.28) }; });
+      if (k === 'december' || k === 'newyear') add(k === 'december' ? 30 : 36, function () { return { k: 'sparkle', x: rnd(0, W), y: rnd(0, H), r: rnd(1.5, 3.5), vy: rnd(8, 20), p: rnd(0, 6.28), s: rnd(0.8, 2.2) }; });
+      if (k === 'december') {                      // string lights along the top
+        var hooks = 6, seg = W / hooks, step = 30;
+        for (var x = 0, i = 0; x <= W; x += step, i++) { var u = (x % seg) / seg; amb.lights.push({ x: x, y: 3 + 12 * Math.sin(Math.PI * u), c: BULB[i % BULB.length], p: rnd(0, 6.28) }); }
+      }
+      if (k === 'frost' || k === 'newyear') amb.frost = makeFrost();
+      if (k === 'hearts') add(10, function () { return { k: 'heart', x: rnd(0, W), y: rnd(0, H), s: rnd(6, 13), vy: -rnd(14, 30), p: rnd(0, 6.28), a: rnd(0.45, 0.8), c: pick(['#e0607e', '#ff8fa8', '#d6336c', '#ffb3c6']) }; });
+      if (k === 'shamrocks') add(8, function () { return { k: 'shamrock', x: rnd(0, W), y: rnd(-H, H), s: rnd(5, 9), vy: rnd(18, 36), rot: rnd(0, 6.28), vr: rnd(-1, 1), p: rnd(0, 6.28), c: pick(['#3fa35b', '#2e8b57', '#5bc47a']) }; });
+      if (k === 'petals') add(14, function () { return { k: 'petal', x: rnd(0, W), y: rnd(-H, H), r: rnd(4, 7), vx: rnd(8, 24), vy: rnd(16, 34), rot: rnd(0, 6.28), vr: rnd(-2, 2), p: rnd(0, 6.28), c: pick(PETAL) }; });
+      if (k === 'fireflies') add(16, function () { return { k: 'fly', x: rnd(0, W), y: rnd(H * 0.2, H), vx: rnd(-20, 20), vy: rnd(-12, 12), p: rnd(0, 6.28), s: rnd(0.6, 1.4), t: 0 }; });
+    }
+    function makeFrost() {
+      var c = document.createElement('canvas'); c.width = W; c.height = H; var g = c.getContext('2d');
+      [[0, 0], [W, 0], [0, H], [W, H]].forEach(function (p) {
+        var gr = g.createRadialGradient(p[0], p[1], 0, p[0], p[1], 300); gr.addColorStop(0, 'rgba(210,235,255,0.22)'); gr.addColorStop(0.6, 'rgba(210,235,255,0.07)'); gr.addColorStop(1, 'rgba(210,235,255,0)');
+        g.fillStyle = gr; g.fillRect(0, 0, W, H);
+        g.strokeStyle = 'rgba(225,242,255,0.35)'; g.lineWidth = 1;
+        for (var i = 0; i < 9; i++) {                 // little six-armed crystals near the corner
+          var ang = rnd(0, 6.28), dist = rnd(30, 230), x = p[0] + Math.cos(ang) * dist, y = p[1] + Math.sin(ang) * dist, r = rnd(4, 10);
+          if (x < 0 || x > W || y < 0 || y > H) continue;
+          for (var a = 0; a < 6; a++) { g.beginPath(); g.moveTo(x, y); g.lineTo(x + Math.cos(a * 1.047) * r, y + Math.sin(a * 1.047) * r); g.stroke(); }
+        }
+      });
+      return c;
+    }
+    function heart(x, y, s) {
+      ctx.beginPath(); ctx.moveTo(x, y + s * 0.7);
+      ctx.bezierCurveTo(x - s * 1.1, y - s * 0.1, x - s * 0.5, y - s * 0.9, x, y - s * 0.3);
+      ctx.bezierCurveTo(x + s * 0.5, y - s * 0.9, x + s * 1.1, y - s * 0.1, x, y + s * 0.7); ctx.fill();
+    }
+    function drawAmbient(t, dt) {
+      var A = amb.parts, i, p;
+      if (amb.frost) ctx.drawImage(amb.frost, 0, 0);
+      if (amb.lights.length) {
+        ctx.strokeStyle = 'rgba(40,40,40,0.9)'; ctx.lineWidth = 1.5; ctx.beginPath();
+        for (i = 0; i < amb.lights.length; i++) { p = amb.lights[i]; if (i) ctx.lineTo(p.x, p.y - 4); else ctx.moveTo(p.x, p.y - 4); }
+        ctx.stroke();
+        for (i = 0; i < amb.lights.length; i++) {
+          p = amb.lights[i]; var tw = 0.65 + 0.35 * Math.sin(t / 700 + p.p), c = hex2rgb(p.c).join(',');
+          ctx.fillStyle = 'rgba(' + c + ',' + (tw * 0.28).toFixed(3) + ')'; ctx.beginPath(); ctx.arc(p.x, p.y + 3, 10, 0, 6.283); ctx.fill();
+          ctx.fillStyle = 'rgba(' + c + ',' + tw.toFixed(3) + ')'; ctx.beginPath(); ctx.arc(p.x, p.y + 3, 4, 0, 6.283); ctx.fill();
+        }
+      }
+      for (i = 0; i < A.length; i++) {
+        p = A[i];
+        if (p.k === 'leaf' || p.k === 'petal') {
+          p.y += p.vy * dt; p.x += (p.vx + Math.sin(t / 1200 + p.p) * 25) * dt; p.rot += p.vr * dt;
+          if (p.y > H + 20) { p.y = -20; p.x = rnd(-40, W); } if (p.x > W + 40) p.x = -30;
+          ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot); ctx.fillStyle = p.c; ctx.globalAlpha = p.k === 'petal' ? 0.8 : 0.9;
+          ctx.beginPath(); ctx.ellipse(0, 0, p.r, p.r * 0.5, 0, 0, 6.283); ctx.fill(); ctx.restore();
+        } else if (p.k === 'bat') {
+          p.x += p.vx * dt; p.y += (p.vy + Math.sin(t / 900 + p.p) * 20) * dt;
+          if (p.x > W + 40) p.x = -40; if (p.x < -40) p.x = W + 40; if (p.y < 20) p.y = 20; if (p.y > H * 0.7) p.y = H * 0.7;
+          var fl = Math.sin(t / 1000 * p.f + p.p) * 0.8, s = p.s, dir = p.vx > 0 ? 1 : -1;
+          ctx.save(); ctx.translate(p.x, p.y); ctx.scale(dir, 1);
+          ctx.fillStyle = '#0a0612'; ctx.strokeStyle = 'rgba(200,170,255,0.4)'; ctx.lineWidth = 1;
+          ctx.beginPath(); ctx.moveTo(-s, 0); ctx.quadraticCurveTo(-s * 0.5, -s * fl, 0, 0); ctx.quadraticCurveTo(s * 0.5, -s * fl, s, 0);
+          ctx.quadraticCurveTo(s * 0.5, s * 0.35, 0, s * 0.2); ctx.quadraticCurveTo(-s * 0.5, s * 0.35, -s, 0); ctx.fill(); ctx.stroke(); ctx.restore();
+        } else if (p.k === 'sparkle') {
+          p.y += p.vy * dt; if (p.y > H) { p.y = -4; p.x = rnd(0, W); }
+          var a2 = 0.2 + 0.8 * Math.pow(Math.abs(Math.sin(t / 1000 * p.s + p.p)), 2), rr = p.r * (0.6 + 0.4 * a2);
+          ctx.fillStyle = 'rgba(235,245,255,' + a2.toFixed(3) + ')';
+          ctx.beginPath(); ctx.moveTo(p.x, p.y - rr); ctx.quadraticCurveTo(p.x, p.y, p.x + rr, p.y); ctx.quadraticCurveTo(p.x, p.y, p.x, p.y + rr);
+          ctx.quadraticCurveTo(p.x, p.y, p.x - rr, p.y); ctx.quadraticCurveTo(p.x, p.y, p.x, p.y - rr); ctx.fill();
+        } else if (p.k === 'heart') {
+          p.y += p.vy * dt; p.x += Math.sin(t / 1400 + p.p) * 18 * dt; if (p.y < -20) { p.y = H + 20; p.x = rnd(0, W); }
+          ctx.fillStyle = p.c; ctx.globalAlpha = p.a * (0.75 + 0.25 * Math.sin(t / 600 + p.p)); heart(p.x, p.y, p.s); ctx.globalAlpha = 1;
+        } else if (p.k === 'shamrock') {
+          p.y += p.vy * dt; p.x += Math.sin(t / 1300 + p.p) * 20 * dt; p.rot += p.vr * dt; if (p.y > H + 20) { p.y = -20; p.x = rnd(0, W); }
+          ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot); ctx.fillStyle = p.c; ctx.globalAlpha = 0.85;
+          for (var l = 0; l < 3; l++) { var an = -1.571 + l * 2.094; ctx.beginPath(); ctx.arc(Math.cos(an) * p.s * 0.8, Math.sin(an) * p.s * 0.8, p.s * 0.75, 0, 6.283); ctx.fill(); }
+          ctx.strokeStyle = p.c; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, p.s * 1.8); ctx.stroke(); ctx.restore();
+        } else if (p.k === 'fly') {
+          p.t -= dt; if (p.t <= 0) { p.vx = rnd(-22, 22); p.vy = rnd(-14, 14); p.t = rnd(1.5, 4); }
+          p.x += p.vx * dt; p.y += p.vy * dt; if (p.x < 0) p.x = W; if (p.x > W) p.x = 0; if (p.y < H * 0.15) p.y = H * 0.15; if (p.y > H) p.y = H;
+          var gl = Math.max(0, Math.sin(t / 1000 * p.s + p.p)); gl = gl * gl * gl;
+          if (gl > 0.02) {
+            var gg = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, 9); gg.addColorStop(0, 'rgba(220,255,120,' + (gl * 0.9).toFixed(3) + ')'); gg.addColorStop(1, 'rgba(220,255,120,0)');
+            ctx.fillStyle = gg; ctx.fillRect(p.x - 9, p.y - 9, 18, 18);
+          }
+        }
+      }
+    }
+    /* fireworks + confetti */
+    function burstFireworks() {
+      var x = rnd(W * 0.15, W * 0.85), y = rnd(H * 0.12, H * 0.45), col = pick(['#ffd166', '#ff6b6b', '#4ecdc4', '#c084fc', '#60a5fa', '#ffffff', '#f472b6']);
+      for (var i = 0; i < 46; i++) { var a = rnd(0, 6.28), v = rnd(110, 250); fw.sparks.push({ x: x, y: y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, life: rnd(1.3, 1.9), c: col }); }
+    }
+    function burstConfetti() {
+      var cols = (cf.colors || []).concat(['#ffffff']), x0 = rnd(W * 0.1, W * 0.9);
+      for (var i = 0; i < 70; i++) cf.bits.push({ x: x0 + rnd(-30, 30), y: -10, vx: rnd(-160, 160), vy: rnd(-60, 120), rot: rnd(0, 6.28), vr: rnd(-6, 6), p: rnd(0, 6.28), life: rnd(3.5, 5), c: pick(cols) });
+    }
+    function drawCelebrations(t, dt) {
+      var i, p;
+      if (fw.kind && t > fw.next) { burstFireworks(); fw.next = t + (fw.kind === 'newyear' ? rnd(1200, 2500) : rnd(6000, 12000)); }
+      for (i = fw.sparks.length - 1; i >= 0; i--) {
+        p = fw.sparks[i]; p.life -= dt; if (p.life <= 0) { fw.sparks.splice(i, 1); continue; }
+        p.vy += 90 * dt; p.vx *= 0.985; p.vy *= 0.985; p.x += p.vx * dt; p.y += p.vy * dt;
+        ctx.fillStyle = p.c; ctx.globalAlpha = Math.min(1, p.life); ctx.beginPath(); ctx.arc(p.x, p.y, 1.9, 0, 6.283); ctx.fill();
+      }
+      if (cf.colors && t > cf.next) { burstConfetti(); cf.next = t + rnd(60000, 120000); }
+      for (i = cf.bits.length - 1; i >= 0; i--) {
+        p = cf.bits[i]; p.life -= dt; if (p.life <= 0 || p.y > H + 10) { cf.bits.splice(i, 1); continue; }
+        p.vy += 260 * dt; p.vy = Math.min(p.vy, 220); p.vx *= 0.99; p.x += (p.vx + Math.sin(t / 300 + p.p) * 40) * dt; p.y += p.vy * dt; p.rot += p.vr * dt;
+        ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot); ctx.fillStyle = p.c; ctx.globalAlpha = Math.min(1, p.life); ctx.fillRect(-4, -2, 8, 4); ctx.restore();
+      }
+      ctx.globalAlpha = 1;
+    }
+
     function draw(t) {
       requestAnimationFrame(draw);
       if (!on || t - lastT < 33) return;            // ~30 fps keeps the Fire Stick cool
@@ -561,6 +974,11 @@
           ctx.strokeStyle = gr; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(shoot.x, shoot.y); ctx.lineTo(shoot.x - shoot.vx * 0.12, shoot.y - shoot.vy * 0.12); ctx.stroke();
           if (shoot.life <= 0) shoot = null; }
       }
+      // Weather comes first: seasonal particles and fireworks sit out rain, snow, fog and storms.
+      var wet = /rain|snow|storm|drizzle|fog|hail/.test(mode);
+      if (!wet) drawAmbient(t, dt); else if (amb.frost || amb.lights.length) { if (amb.frost) ctx.drawImage(amb.frost, 0, 0); }
+      if (wet) fw.sparks = [];
+      if (!wet || cf.bits.length) drawCelebrations(t, dt);
       if (/storm/.test(mode)) {             // lightning
         if (t > nextBolt) { flash = 1; nextBolt = t + rnd(6000, 16000); }
         if (flash > 0) { ctx.fillStyle = 'rgba(200,210,255,' + (flash * 0.18).toFixed(3) + ')'; ctx.fillRect(0, 0, W, H); flash -= dt * 3; }
@@ -571,18 +989,30 @@
       ctx.fillStyle = v; ctx.fillRect(0, 0, W, H);
     }
     requestAnimationFrame(draw);
-    return { setCondition: function (w) { var m = modeOf(w); if (m !== mode || !parts.length) { mode = m; build(); } } };
+    return {
+      setCondition: function (w) { var m = modeOf(w); if (m !== mode || !parts.length) { mode = m; build(); } },
+      setAmbient: function (kind, pal) { amb.pal = pal; if (kind !== amb.kind) { amb.kind = kind; buildAmbient(); } },
+      setFireworks: function (kind) { if (kind !== fw.kind) { fw.kind = kind; fw.next = 0; } },
+      setConfetti: function (colors) { var k = colors ? colors.join() : null, ok = cf.colors ? cf.colors.join() : null; if (k !== ok) { cf.colors = colors; cf.next = 0; } },
+      mode: function () { return mode; }, ambient: function () { return amb.kind; }, counts: function () { return { weather: parts.length, ambient: amb.parts.length, lights: amb.lights.length, fireworks: fw.sparks.length, confetti: cf.bits.length }; }
+    };
   })();
 
   /* ── Go ── */
-  tick(); updateMoon(); updateDim(); fetchWeather(); fetchFeed(); fetchGames(); fx.setCondition(wx);
+  tick(); updateMoon(); updateDim(); fetchWeather(); fetchFeed(); fetchGames(); fetchSensors(); fx.setCondition(wx); applyTheme();
   setInterval(tick, 1000);
+  setInterval(fetchSensors, 20 * 1000);
   setInterval(function () { updateSunBar(); updateDim(); }, 30 * 1000);
+  setInterval(function () { applyTheme(); pollLive(); }, 60 * 1000);
   setInterval(updateMoon, 10 * 60 * 1000);
   setInterval(fetchWeather, 10 * 60 * 1000);
   setInterval(fetchFeed, 15 * 60 * 1000);
   setInterval(fetchGames, 5 * 60 * 1000);
   setTimeout(function () { location.reload(); }, 6 * 60 * 60 * 1000);   // fresh start every 6 hours
+
+  // Hooks for the Playwright checks (not used by the board itself)
+  window.LOUNGE = { dimLevel: dimLevel, seasonOf: seasonOf, ambientFor: ambientFor, fireworksNow: fireworksNow, currentWin: currentWin, fx: fx, TEST: TEST,
+    sched: function () { return sched; }, renderSensors: renderSensors, applyTheme: applyTheme, setSun: function (r, s) { sun = { rise: r, set: s }; } };
 })();
 </script>
 </body>
