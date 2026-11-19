@@ -388,10 +388,10 @@
     var cats = Object.keys(L); if (!cats.length) return;
     var t = nowParts(), key = ((t.y * 100 + t.mo) * 100 + t.d) * 100 + t.h;
     if (key === lastLoreKey) return; lastLoreKey = key;
-    // one pool: every entry, built-in or from the sheet, has the same chance each hour
+    // The sheet is the library. The built-in list is only a fallback for when the sheet can't be read.
     var pool = [], mine = window.MY_LORE || {};
-    cats.forEach(function (c) { L[c].forEach(function (x) { pool.push({ label: labels[c] || c, e: x }); }); });
     Object.keys(mine).forEach(function (c) { mine[c].forEach(function (x) { pool.push({ label: c, e: x }); }); });
+    if (!pool.length) cats.forEach(function (c) { L[c].forEach(function (x) { pool.push({ label: labels[c] || c, e: x }); }); });
     var pick = pool[Math.floor(seeded(key * 2.71 + 11) * pool.length)], e = pick.e;
     document.getElementById('lore-label').textContent = pick.label;
     document.getElementById('lore-title').textContent = e.title;
@@ -399,9 +399,10 @@
     document.getElementById('lore-attr').textContent = e.attr;
   }
 
-  /* ── My lore: a Google Sheet (config.loreSheet) with columns Category | Title | Text | Attribution.
-     Read through the sheet's visualization endpoint, which returns JavaScript, so it works without
-     any server. The sheet only has to be shared "anyone with the link can view". ── */
+  /* ── The lore sheet: a Google Sheet (config.loreSheet) with columns Category | Title | Text | Attribution.
+     It holds the whole library, so deleting a row removes that entry from the board. Read through the
+     sheet's visualization endpoint, which returns JavaScript, so it works without any server. The sheet
+     only has to be shared "anyone with the link can view". ── */
   window.onMyLore = function (res) {
     try {
       var rows = (res && res.table && res.table.rows) || [], out = {};

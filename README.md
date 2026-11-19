@@ -7,8 +7,9 @@ Two wall-screen dashboards that replaced DAKboard.
 - `config.js` — the only settings file (feed address, locations, night dimming, teams)
 - `lore-data.js` — Study Board's lore library and constellations
 - Your own quotes: the Google Sheet "Study Board - My Lore" (columns Category | Title | Text | Attribution,
-  shared anyone-with-link). `config.loreSheet` names it; the board re-reads it hourly and draws each hour's
-  entry from your rows and the built-in library together, as one pool.
+  shared anyone-with-link). `config.loreSheet` names it; it holds the whole library (the original entries were
+  copied in), so add, edit or delete rows freely; the board re-reads it hourly. `lore-data.js` is only the
+  fallback when the sheet can't be reached, plus the constellations.
 - `apps-script/` — reference copy of the "Home Dashboards Feed" Google Apps Script (the live one is deployed from script.google.com)
 
 Data comes from the "Home Dashboards Feed" Google Apps Script (read-only: next 3 weeks of

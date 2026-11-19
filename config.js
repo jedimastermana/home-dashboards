@@ -13,7 +13,8 @@ window.DASH_CONFIG = {
   timezone: 'America/New_York',
 
   // Study: a Google Sheet of your own quotes and lore (columns: Category | Title | Text | Attribution),
-  // shared "anyone with the link can view". Your entries join the built-in library in one pool.
+  // shared "anyone with the link can view". It is the whole library: add, edit or delete rows freely.
+  // (lore-data.js is only the fallback used when the sheet can't be reached.)
   loreSheet: '1PBloPCFFi4k34e2l1s-hp1dnI4rHI0L56YYy_ad1wtA',
 
   // Lounge: sun-based dimming. Full brightness by day; after sunset a gentle dim (duskOpacity)
