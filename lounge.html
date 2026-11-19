@@ -332,8 +332,24 @@
     function least(list) { var m = 1e9; list.forEach(function (x) { if (x > 0 && x < m) m = x; }); return m < 1e9 ? m : 0; }
     return { w: least([window.innerWidth, de.clientWidth, vv && vv.width]), h: least([window.innerHeight, de.clientHeight, vv && vv.height]) };
   }
+  /* The board is drawn 1280×800 (16:10). On a wider screen it widens itself to the screen's shape,
+     up to 1600, and the extra width goes to the photo; everything else slides right. ?width=1280 pins it. */
+  var PIN_W = parseInt(new URLSearchParams(location.search).get('width') || '0', 10) || 0;
+  var BASE_W = 1280, SHIFT = ['clockw', 'concerts', 'calendar', 'sports'], GROW = ['photo', 'frame', 'winbanner', 'chips'], FULL = ['gate', 'fx', 'dim'];
+  var baseLeft = {}, baseWidth = {};
+  function layout(newW) {
+    if (newW === W) return;
+    var extra = newW - BASE_W, st = document.getElementById('stage');
+    st.style.width = newW + 'px';
+    SHIFT.forEach(function (id) { var el = document.getElementById(id); if (!el) return; if (baseLeft[id] == null) baseLeft[id] = parseFloat(getComputedStyle(el).left); el.style.left = (baseLeft[id] + extra) + 'px'; });
+    GROW.forEach(function (id) { var el = document.getElementById(id); if (!el) return; if (baseWidth[id] == null) baseWidth[id] = parseFloat(getComputedStyle(el).width); el.style.width = (baseWidth[id] + extra) + 'px'; });
+    FULL.forEach(function (id) { var el = document.getElementById(id); if (el) el.style.width = newW + 'px'; });
+    var cv = document.getElementById('fx'); if (cv && cv.width !== newW) cv.width = newW;
+    W = newW;
+  }
   function fit() {
     var v = viewport(); if (!v.w || !v.h) return;
+    layout(PIN_W || Math.max(BASE_W, Math.min(1600, Math.round(H * v.w / v.h))));
     var s = Math.min(v.w / W, v.h / H) * ZOOM;
     var ox = (v.w - W * s) / 2, oy = (v.h - H * s) / 2;
     document.getElementById('stage').style.transform = 'translate(' + ox + 'px,' + oy + 'px) scale(' + s + ')';

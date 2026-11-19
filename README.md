@@ -2,7 +2,9 @@
 
 Two wall-screen dashboards that replaced DAKboard.
 
-- `lounge.html` — kitchen/lounge screen (1280×800 landscape) — runs on the Fire Stick
+- `lounge.html` — kitchen/lounge screen (drawn 1280×800; on a wider screen it widens to the screen's shape, up to
+  1600, and the photo takes the extra width) — runs on the Fire Stick in Fully Kiosk Browser. Add `?zoom=0.92` if
+  the TV crops the edges, `?width=1280` to pin the old shape
 - `study.html` — Study Board (1600×2560 portrait) — add `?rotate=90` if the display can't rotate itself
 - `config.js` — the only settings file (feed address, locations, night dimming, teams)
 - `lore-data.js` — Study Board's lore library and constellations
