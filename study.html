@@ -50,31 +50,31 @@
   /* ── CLOCK ── */
   #clock { left: 0; top: 961px; width: 1600px; height: 506px; display: flex; align-items: center; justify-content: center; text-align: center; }
   .clock-time { font-family: 'Cinzel', 'Times New Roman', serif; font-size: 208px; font-weight: 400; color: #e2c84a; letter-spacing: 0.06em; line-height: 1; white-space: nowrap; }
-  .clock-period { font-size: 56px; color: #7a8a5a; letter-spacing: 0.22em; text-transform: uppercase; margin-top: 6px; }
-  .clock-date { font-size: 56px; color: #9a9a6a; font-style: italic; letter-spacing: 0.08em; margin-bottom: 16px; }
+  .clock-period { font-size: 60px; color: #7a8a5a; letter-spacing: 0.22em; text-transform: uppercase; margin-top: 6px; }
+  .clock-date { font-size: 62px; color: #9a9a6a; font-style: italic; letter-spacing: 0.08em; margin-bottom: 16px; }
   .ornament { display: flex; align-items: center; gap: 16px; margin: 0 auto; width: 60%; }
   .orn-line { flex: 1; height: 1px; background: linear-gradient(90deg, transparent, #4a5a2a); }
   .orn-line.right { background: linear-gradient(90deg, #4a5a2a, transparent); }
   .moon-wrap { display: flex; flex-direction: column; align-items: center; gap: 5px; }
   .moon-wrap svg { width: 46px; height: 46px; display: block; }
-  .moon-name { font-size: 29px; color: #3a4a28; letter-spacing: 0.16em; text-transform: uppercase; }
+  .moon-name { font-size: 36px; color: #566a3c; letter-spacing: 0.16em; text-transform: uppercase; }
 
   /* ── WEATHER ── */
   #weather { left: 0; top: 1442px; width: 1600px; height: 344px; display: flex; align-items: center; justify-content: center; }
-  .card { width: 90%; background: #111409; border: 1px solid #6a8a4a; border-top: 2px solid #8ab060; padding: 3.2% 4.5%; }
+  .card { width: 94%; background: #111409; border: 1px solid #6a8a4a; border-top: 2px solid #8ab060; padding: 3.2% 4.5%; }
   .weather-row { display: flex; align-items: center; }
   .vdiv { width: 1px; align-self: stretch; background: #1e2214; margin: 0 4%; flex-shrink: 0; }
   .col-current { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
   .temp { font-family: 'Cinzel', serif; font-size: 96px; color: #b8a870; line-height: 1; }
-  .condition { font-size: 48px; color: #7a8a5a; font-style: italic; letter-spacing: 0.04em; white-space: nowrap; }
+  .condition { font-size: 56px; color: #7a8a5a; font-style: italic; letter-spacing: 0.04em; white-space: nowrap; }
   .col-details { display: flex; flex-direction: column; align-items: center; gap: 6px; }
   .col-details svg { width: 64px; height: 64px; }
-  .feels { font-size: 48px; color: #5a6a40; letter-spacing: 0.04em; white-space: nowrap; }
-  .hi-lo { font-size: 32px; color: #5a6a40; letter-spacing: 0.04em; white-space: nowrap; }
+  .feels { font-size: 54px; color: #5a6a40; letter-spacing: 0.04em; white-space: nowrap; }
+  .hi-lo { font-size: 44px; color: #5a6a40; letter-spacing: 0.04em; white-space: nowrap; }
   .col-day { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; }
-  .col-day svg { width: 46px; height: 46px; }
-  .fc-day-name { font-size: 30px; color: #3a4a28; letter-spacing: 0.16em; text-transform: uppercase; }
-  .fc-temps { font-size: 37px; color: #5a6a40; letter-spacing: 0.04em; white-space: nowrap; }
+  .col-day svg { width: 56px; height: 56px; }
+  .fc-day-name { font-size: 40px; color: #566a3c; letter-spacing: 0.16em; text-transform: uppercase; }
+  .fc-temps { font-size: 44px; color: #5a6a40; letter-spacing: 0.04em; white-space: nowrap; }
   .fc-temps .hi { color: #7a8a5a; }
 
   /* ── SUN + CONSTELLATION ── */
@@ -83,18 +83,18 @@
   .strip .vdiv { margin: 0 3%; }
   .sun-col { flex: 0 0 28%; display: flex; flex-direction: column; gap: 8px; }
   .sun-times { display: flex; justify-content: space-between; align-items: baseline; }
-  .sun-time { font-size: 35px; color: #5a6a40; letter-spacing: 0.08em; }
+  .sun-time { font-size: 44px; color: #5a6a40; letter-spacing: 0.08em; }
   .bar-track { position: relative; width: 100%; height: 6px; background: #1a2210; border-radius: 3px; }
   .bar-fill { position: absolute; left: 0; top: 0; height: 6px; background: #4a6a30; border-radius: 3px; transition: width 1s linear; }
   .sun-dot { position: absolute; top: 50%; transform: translate(-50%, -50%); width: 16px; height: 16px; border-radius: 50%; border: 2px solid #0e0f0b; transition: left 1s linear; }
   .sun-labels { display: flex; justify-content: space-between; }
-  .sun-label { font-size: 32px; color: #2a3a1a; letter-spacing: 0.12em; text-transform: uppercase; }
-  .sun-remaining { font-size: 35px; color: #3a4a28; font-style: italic; text-align: center; letter-spacing: 0.06em; }
+  .sun-label { font-size: 38px; color: #4a5c34; letter-spacing: 0.12em; text-transform: uppercase; }
+  .sun-remaining { font-size: 42px; color: #566a3c; font-style: italic; text-align: center; letter-spacing: 0.06em; }
   .const-col { flex: 1; display: flex; align-items: center; justify-content: center; }
   .const-col svg { width: 100%; height: auto; }
   .name-col { flex: 0 0 22%; text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
-  .const-name { font-family: 'Cinzel', serif; font-size: 45px; color: #b8a870; letter-spacing: 0.08em; line-height: 1.2; }
-  .const-myth { font-size: 30px; color: #3a4a28; font-style: italic; line-height: 1.4; letter-spacing: 0.04em; white-space: pre-line; }
+  .const-name { font-family: 'Cinzel', serif; font-size: 54px; color: #b8a870; letter-spacing: 0.08em; line-height: 1.2; }
+  .const-myth { font-size: 40px; color: #566a3c; font-style: italic; line-height: 1.4; letter-spacing: 0.04em; white-space: pre-line; }
 
   /* ── LORE ── */
   #lore { left: 0; top: 1988px; width: 1600px; height: 570px; display: flex; align-items: center; justify-content: center; }
@@ -103,10 +103,10 @@
   .lore-wrap .orn-line { background: linear-gradient(90deg, transparent, #3a4a22); }
   .lore-wrap .orn-line.right { background: linear-gradient(90deg, #3a4a22, transparent); }
   .orn-center { color: #7a5218; font-size: 32px; letter-spacing: 0.2em; }
-  .lore-label { font-size: 40px; color: #3a4a28; letter-spacing: 0.22em; text-transform: uppercase; margin-bottom: 12px; }
-  .lore-title { font-family: 'Cinzel', serif; font-size: 61px; color: #b8a870; letter-spacing: 0.08em; margin-bottom: 12px; line-height: 1.2; }
-  .lore-body { font-size: 45px; color: #7a8a5a; font-style: italic; line-height: 1.6; letter-spacing: 0.04em; }
-  .lore-attr { font-size: 35px; color: #3a4a28; letter-spacing: 0.14em; margin-top: 12px; }
+  .lore-label { font-size: 44px; color: #566a3c; letter-spacing: 0.22em; text-transform: uppercase; margin-bottom: 12px; }
+  .lore-title { font-family: 'Cinzel', serif; font-size: 68px; color: #b8a870; letter-spacing: 0.08em; margin-bottom: 12px; line-height: 1.2; }
+  .lore-body { font-size: 50px; color: #7a8a5a; font-style: italic; line-height: 1.5; letter-spacing: 0.04em; }
+  .lore-attr { font-size: 42px; color: #566a3c; letter-spacing: 0.14em; margin-top: 12px; }
 </style>
 </head>
 <body>
