@@ -322,13 +322,25 @@
     if (!s) return; var i = s.indexOf(':'); TEST[i < 0 ? s : s.slice(0, i)] = i < 0 ? true : s.slice(i + 1);
   });
 
-  /* ── Fit the 1280×800 board to the screen (Fire Stick reports 960×540) ── */
+  /* ── Fit the 1280×800 board to the screen (Fire Stick reports 960×540) ──
+     Kiosk browsers sometimes report a viewport larger than what is visible, so take the smallest
+     of every measure we have. Add ?zoom=0.9 to the address to shrink the board by hand if a TV
+     still cuts the edges off (overscan). ── */
+  var ZOOM = parseFloat(new URLSearchParams(location.search).get('zoom') || '1') || 1;
+  function viewport() {
+    var vv = window.visualViewport, de = document.documentElement;
+    function least(list) { var m = 1e9; list.forEach(function (x) { if (x > 0 && x < m) m = x; }); return m < 1e9 ? m : 0; }
+    return { w: least([window.innerWidth, de.clientWidth, vv && vv.width]), h: least([window.innerHeight, de.clientHeight, vv && vv.height]) };
+  }
   function fit() {
-    var s = Math.min(window.innerWidth / W, window.innerHeight / H);
-    var ox = (window.innerWidth - W * s) / 2, oy = (window.innerHeight - H * s) / 2;
+    var v = viewport(); if (!v.w || !v.h) return;
+    var s = Math.min(v.w / W, v.h / H) * ZOOM;
+    var ox = (v.w - W * s) / 2, oy = (v.h - H * s) / 2;
     document.getElementById('stage').style.transform = 'translate(' + ox + 'px,' + oy + 'px) scale(' + s + ')';
   }
-  window.addEventListener('resize', fit); fit();
+  window.addEventListener('resize', fit);
+  if (window.visualViewport) window.visualViewport.addEventListener('resize', fit);
+  fit(); [300, 1000, 3000, 8000].forEach(function (ms) { setTimeout(fit, ms); });   // the kiosk browser can settle its size after load
 
   /* ── New York wall-clock helpers ──
      Every time on this board is handled as New York "wall time", stored as
