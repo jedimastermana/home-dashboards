@@ -388,12 +388,42 @@
     var cats = Object.keys(L); if (!cats.length) return;
     var t = nowParts(), key = ((t.y * 100 + t.mo) * 100 + t.d) * 100 + t.h;
     if (key === lastLoreKey) return; lastLoreKey = key;
-    var cat = cats[Math.floor(seeded(key * 1.37) * cats.length)];
-    var list = L[cat], e = list[Math.floor(seeded(key * 2.71 + 11) * list.length)];
-    document.getElementById('lore-label').textContent = labels[cat] || cat;
+    var mine = window.MY_LORE || {}, myCats = Object.keys(mine), e, cat;
+    if (myCats.length && t.h % 2 === 1) {            // odd hours come from the sheet, even hours from the library
+      cat = myCats[Math.floor(seeded(key * 1.37) * myCats.length)];
+      e = mine[cat][Math.floor(seeded(key * 2.71 + 11) * mine[cat].length)];
+      document.getElementById('lore-label').textContent = cat;
+    } else {
+      cat = cats[Math.floor(seeded(key * 1.37) * cats.length)];
+      e = L[cat][Math.floor(seeded(key * 2.71 + 11) * L[cat].length)];
+      document.getElementById('lore-label').textContent = labels[cat] || cat;
+    }
     document.getElementById('lore-title').textContent = e.title;
     document.getElementById('lore-body').textContent = e.body;
     document.getElementById('lore-attr').textContent = e.attr;
+  }
+
+  /* ── My lore: a Google Sheet (config.loreSheet) with columns Category | Title | Text | Attribution.
+     Read through the sheet's visualization endpoint, which returns JavaScript, so it works without
+     any server. The sheet only has to be shared "anyone with the link can view". ── */
+  window.onMyLore = function (res) {
+    try {
+      var rows = (res && res.table && res.table.rows) || [], out = {};
+      rows.forEach(function (r) {
+        var c = (r.c || []).map(function (x) { return x && x.v != null ? String(x.v).trim() : ''; });
+        if (!c[2]) return;                                       // no text, no entry
+        var cat = c[0] || 'From My Shelf';
+        (out[cat] = out[cat] || []).push({ title: c[1], body: c[2], attr: c[3] ? (c[3].charAt(0) === '—' ? c[3] : '— ' + c[3]) : '' });
+      });
+      window.MY_LORE = out; lastLoreKey = null; updateLore();
+    } catch (e) {}
+  };
+  function loadMyLore() {
+    if (!CFG.loreSheet) return;
+    var old = document.getElementById('my-lore-script'); if (old) old.parentNode.removeChild(old);
+    var sc = document.createElement('script'); sc.id = 'my-lore-script';
+    sc.src = 'https://docs.google.com/spreadsheets/d/' + CFG.loreSheet + '/gviz/tq?tqx=responseHandler:onMyLore&headers=1&_=' + Date.now();
+    document.head.appendChild(sc);
   }
 
   /* ── Photos ── */
@@ -433,6 +463,7 @@
 
   /* ── Go ── */
   updateClock(); updateMoon(); updateLore(); drawConstellation(); fetchWeather(); loadPhotos();
+  loadMyLore(); setInterval(loadMyLore, 60 * 60 * 1000);    // your sheet, re-read hourly
   setInterval(function () { updateClock(); updateSun(); updateLore(); }, 1000);
   setInterval(function () { updateMoon(); drawConstellation(); }, 10 * 60 * 1000);
   setInterval(fetchWeather, 10 * 60 * 1000);

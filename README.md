@@ -6,6 +6,9 @@ Two wall-screen dashboards that replaced DAKboard.
 - `study.html` — Study Board (1600×2560 portrait) — add `?rotate=90` if the display can't rotate itself
 - `config.js` — the only settings file (feed address, locations, night dimming, teams)
 - `lore-data.js` — Study Board's lore library and constellations
+- Your own quotes: the Google Sheet "Study Board - My Lore" (columns Category | Title | Text | Attribution,
+  shared anyone-with-link). `config.loreSheet` names it; the board re-reads it hourly and shows one of
+  yours on odd hours, one from the library on even hours.
 - `apps-script/` — reference copy of the "Home Dashboards Feed" Google Apps Script (the live one is deployed from script.google.com)
 
 Data comes from the "Home Dashboards Feed" Google Apps Script (read-only: next 3 weeks of

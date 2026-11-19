@@ -12,6 +12,10 @@ window.DASH_CONFIG = {
   study:  { lat: 41.65026, lon: -73.76439 },
   timezone: 'America/New_York',
 
+  // Study: a Google Sheet of your own quotes and lore (columns: Category | Title | Text | Attribution),
+  // shared "anyone with the link can view". Odd hours show one of yours, even hours one from the library.
+  loreSheet: '1PBloPCFFi4k34e2l1s-hp1dnI4rHI0L56YYy_ad1wtA',
+
   // Lounge: sun-based dimming. Full brightness by day; after sunset a gentle dim (duskOpacity)
   // eases in over duskMinutes; the deep dim (deepOpacity) starts at deepStart; back to full
   // over the wakeMinutes before sunrise. (start/end/opacity are the old fixed-schedule fallback,
