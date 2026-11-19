@@ -388,16 +388,12 @@
     var cats = Object.keys(L); if (!cats.length) return;
     var t = nowParts(), key = ((t.y * 100 + t.mo) * 100 + t.d) * 100 + t.h;
     if (key === lastLoreKey) return; lastLoreKey = key;
-    var mine = window.MY_LORE || {}, myCats = Object.keys(mine), e, cat;
-    if (myCats.length && t.h % 2 === 1) {            // odd hours come from the sheet, even hours from the library
-      cat = myCats[Math.floor(seeded(key * 1.37) * myCats.length)];
-      e = mine[cat][Math.floor(seeded(key * 2.71 + 11) * mine[cat].length)];
-      document.getElementById('lore-label').textContent = cat;
-    } else {
-      cat = cats[Math.floor(seeded(key * 1.37) * cats.length)];
-      e = L[cat][Math.floor(seeded(key * 2.71 + 11) * L[cat].length)];
-      document.getElementById('lore-label').textContent = labels[cat] || cat;
-    }
+    // one pool: every entry, built-in or from the sheet, has the same chance each hour
+    var pool = [], mine = window.MY_LORE || {};
+    cats.forEach(function (c) { L[c].forEach(function (x) { pool.push({ label: labels[c] || c, e: x }); }); });
+    Object.keys(mine).forEach(function (c) { mine[c].forEach(function (x) { pool.push({ label: c, e: x }); }); });
+    var pick = pool[Math.floor(seeded(key * 2.71 + 11) * pool.length)], e = pick.e;
+    document.getElementById('lore-label').textContent = pick.label;
     document.getElementById('lore-title').textContent = e.title;
     document.getElementById('lore-body').textContent = e.body;
     document.getElementById('lore-attr').textContent = e.attr;
