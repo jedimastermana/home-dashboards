@@ -26,10 +26,10 @@ Weather: Open-Meteo. Sports: ESPN.
 
 - **Gate warning** — polls the feed's `?part=sensors` every 20 s. Any open `gate` sensor takes over
   the screen with a red warning (gate name, "open since h:mm (N min)"), above the night dim, and sets
-  off the alarm: for the first 30 s the whole screen strobes red/white three times a second and a siren
-  sounds; after that, every minute, a 10 s strobe and 6 s of siren until the gate closes. The siren is
-  synthesized in the page (the kiosk browser must allow autoplay: in Fully, Web Content Settings > Autoplay
-  Videos) and, when Fully's JavaScript interface is on, also played through Fully from `alarm.wav`.
+  off the alarm: for the first 30 s the whole screen strobes red/white three times a second; after that,
+  every minute, a 10 s strobe, until the gate closes. A short double beep sounds every 30 s throughout. The
+  beep is synthesized in the page (the kiosk browser must allow autoplay: in Fully, Web Content Settings >
+  Autoplay Videos) and, when Fully's JavaScript interface is on, also played through Fully from `alarm.wav`.
   Open garage doors get a small chip at the top of the photo instead.
 - **Sports** — four tiles in time order across both teams: any result from the last ~18 h (the same
   window as the win celebration), then the next games as they come. During a game its tile turns live

@@ -323,7 +323,7 @@
   var W = 1280, H = 800, HOUR = 3600000, DAY = 86400000;
 
   /* ── ?test= previews ──  e.g. lounge.html?test=gate  or  ?test=win:nyj,season:halloween,night,live,fireworks
-     gate (strobe + siren too) · win[:ABBR] · live · season:NAME · night · fireworks · dim:0.5 · alert · rain · day:MM-DD or day:YYYY-MM-DD (pretend it's that date for special days) */
+     gate (strobe + beeps too) · win[:ABBR] · live · season:NAME · night · fireworks · dim:0.5 · alert · rain · day:MM-DD or day:YYYY-MM-DD (pretend it's that date for special days) */
   var TEST = {};
   (new URLSearchParams(location.search).get('test') || '').split(',').forEach(function (s) {
     if (!s) return; var i = s.indexOf(':'); TEST[i < 0 ? s : s.slice(0, i)] = i < 0 ? true : s.slice(i + 1);
@@ -615,38 +615,33 @@
 
   /* ── Gates & doors (SharpTools → feed ?sensor=…&state=… → here, polled every 20 s) ── */
   function durText(mins) { return mins < 60 ? mins + ' min' : Math.floor(mins / 60) + ' h ' + (mins % 60) + ' min'; }
-  /* ── Gate alarm: strobe + siren while a gate is open.
-     First 30 s: strobe and siren non-stop. After that, every minute: a 10 s strobe and 6 s of siren.
-     Sound needs the kiosk browser to allow autoplay (Fully: Web Content Settings > Autoplay). If Fully's
-     JavaScript interface is on, its own player is used too, which never needs permission. ── */
+  /* ── Gate alarm: strobe + a beep while a gate is open.
+     First 30 s: strobe non-stop. After that, every minute, a 10 s strobe. A short double beep every 30 s
+     the whole time. Sound needs the kiosk browser to allow autoplay (Fully: Web Content Settings >
+     Autoplay Videos); with Fully's JavaScript interface on, its own player is used too. ── */
   var alarm = (function () {
-    var on = false, t0 = 0, timer = null, ac = null, osc = null, gain = null, lfo = null, sirenUntil = 0;
+    var on = false, t0 = 0, timer = null, ac = null, lastBeep = -1;
     var gate = function () { return document.getElementById('gate'); };
-    function sirenOn() {
-      if (window.fully && typeof fully.playSound === 'function') { try { fully.playSound(location.href.replace(/[^\/]*$/, '') + 'alarm.wav', true); } catch (e) {} }
+    function beep() {
+      if (window.fully && typeof fully.playSound === 'function') { try { fully.playSound(location.href.replace(/[^\/]*$/, '') + 'alarm.wav'); } catch (e) {} }
       try {
         if (!ac) ac = new (window.AudioContext || window.webkitAudioContext)();
         if (ac.state === 'suspended') ac.resume();
-        if (osc) return;
-        osc = ac.createOscillator(); gain = ac.createGain(); lfo = ac.createOscillator(); var lg = ac.createGain();
-        osc.type = 'square'; osc.frequency.value = 770; lfo.type = 'square'; lfo.frequency.value = 2; lg.gain.value = 110;
-        lfo.connect(lg); lg.connect(osc.frequency); gain.gain.value = 0.25; osc.connect(gain); gain.connect(ac.destination); osc.start(); lfo.start();
+        [0, 0.25].forEach(function (at) {
+          var o = ac.createOscillator(), g = ac.createGain(), t = ac.currentTime + at;
+          o.type = 'sine'; o.frequency.value = 880; g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.4, t + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.15);
+          o.connect(g); g.connect(ac.destination); o.start(t); o.stop(t + 0.16);
+        });
       } catch (e) {}
     }
-    function sirenOff() {
-      if (window.fully && typeof fully.stopSound === 'function') { try { fully.stopSound(); } catch (e) {} }
-      try { if (osc) { osc.stop(); lfo.stop(); osc.disconnect(); lfo.disconnect(); } } catch (e) {}
-      osc = lfo = gain = null;
-    }
     function step() {
-      var el = Date.now() - t0, inMinute = el % 60000;
-      var strobe = el < 30000 || inMinute < 10000, siren = el < 30000 || inMinute < 6000;
-      gate().classList.toggle('strobe', strobe);
-      if (siren) sirenOn(); else sirenOff();
+      var el = Date.now() - t0, inMinute = el % 60000, slot = Math.floor(el / 30000);
+      gate().classList.toggle('strobe', el < 30000 || inMinute < 10000);
+      if (slot !== lastBeep) { lastBeep = slot; beep(); }
     }
     return {
-      start: function () { if (on) return; on = true; t0 = Date.now(); step(); timer = setInterval(step, 500); },
-      stop: function () { if (!on) return; on = false; clearInterval(timer); gate().classList.remove('strobe'); sirenOff(); },
+      start: function () { if (on) return; on = true; t0 = Date.now(); lastBeep = -1; step(); timer = setInterval(step, 500); },
+      stop: function () { if (!on) return; on = false; clearInterval(timer); gate().classList.remove('strobe'); },
       active: function () { return on; }
     };
   })();
