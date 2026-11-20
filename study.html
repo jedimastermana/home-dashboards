@@ -51,6 +51,8 @@
   #clock { left: 0; top: 961px; width: 1600px; height: 506px; display: flex; align-items: center; justify-content: center; text-align: center; }
   .clock-time { font-family: 'Cinzel', 'Times New Roman', serif; font-size: 208px; font-weight: 400; color: #e2c84a; letter-spacing: 0.06em; line-height: 1; white-space: nowrap; }
   .clock-period { font-size: 60px; color: #7a8a5a; letter-spacing: 0.22em; text-transform: uppercase; margin-top: 6px; }
+  .clock-special { font-family: 'Cinzel', serif; font-size: 40px; color: #e2c84a; letter-spacing: 0.1em; line-height: 1.1; margin: -8px 0 4px; display: none; }
+  .clock-special.on { display: block; }
   .clock-date { font-size: 62px; color: #9a9a6a; font-style: italic; letter-spacing: 0.08em; margin-bottom: 16px; }
   .ornament { display: flex; align-items: center; gap: 16px; margin: 0 auto; width: 60%; }
   .orn-line { flex: 1; height: 1px; background: linear-gradient(90deg, transparent, #4a5a2a); }
@@ -123,6 +125,7 @@
       <div class="clock-time" id="time">--:--</div>
       <div class="clock-period" id="period"></div>
       <div class="clock-date" id="date"></div>
+      <div class="clock-special" id="special"></div>
       <div class="ornament">
         <div class="orn-line"></div>
         <div class="moon-wrap">
@@ -415,6 +418,63 @@
       window.MY_LORE = out; lastLoreKey = null; updateLore();
     } catch (e) {}
   };
+  /* ── Special days (config.specialSheet): the same sheet the Lounge uses. Here only the name shows,
+     under the date. Columns: Date | Name | Colors | Effect | Message | Boards. ── */
+  var specialRows = [];
+  function floating(key, y) {
+    key = key.toLowerCase().replace(/[^a-z]/g, '');
+    function nth(m, dow, n) { var first = new Date(Date.UTC(y, m, 1)).getUTCDay(); return [m, 1 + ((dow - first + 7) % 7) + 7 * (n - 1)]; }
+    function last(m, dow) { var d = new Date(Date.UTC(y, m + 1, 0)); return [m, d.getUTCDate() - ((d.getUTCDay() - dow + 7) % 7)]; }
+    if (key === 'easter') { var a = y % 19, b = Math.floor(y / 100), c = y % 100, d = Math.floor(b / 4), e = b % 4, f = Math.floor((b + 8) / 25), g = Math.floor((b - f + 1) / 3), h = (19 * a + b - d - g + 15) % 30, i = Math.floor(c / 4), k = c % 4, l = (32 + 2 * e + 2 * i - h - k) % 7, m = Math.floor((a + 11 * h + 22 * l) / 451), mo = Math.floor((h + l - 7 * m + 114) / 31), da = ((h + l - 7 * m + 114) % 31) + 1; return [mo - 1, da]; }
+    if (key === 'thanksgiving') return nth(10, 4, 4);
+    if (key === 'mothersday') return nth(4, 0, 2);
+    if (key === 'fathersday') return nth(5, 0, 3);
+    if (key === 'memorialday') return last(4, 1);
+    if (key === 'laborday') return nth(8, 1, 1);
+    return null;
+  }
+  function dateKey(y, m, d) { return y * 10000 + (m + 1) * 100 + d; }
+  function parseWhen(v) {
+    if (v instanceof Date) { var vm = v.getMonth(), vd = v.getDate(); return { kind: 1, test: function (y, m, d) { return m === vm && d === vd; } }; }
+    var t = String(v || '').trim().toLowerCase(); if (!t) return null;
+    var parts = t.split(/\s+(?:to|-|–|through)\s+/), a = parts[0], b = parts[1] || parts[0];
+    function one(x) { var m1 = /^(\d{4})-(\d{1,2})-(\d{1,2})$/.exec(x), m2 = /^(\d{1,2})[-\/](\d{1,2})$/.exec(x); if (m1) return { y: +m1[1], m: +m1[2] - 1, d: +m1[3] }; if (m2) return { m: +m2[1] - 1, d: +m2[2] }; return null; }
+    if (floating(a, 2000)) return { kind: 2, test: function (y, m, d) { var f = floating(a, y); return f && f[0] === m && f[1] === d; } };
+    var A = one(a), B = one(b); if (!A || !B) return null;
+    if (A.y != null) return { kind: 0, test: function (y, m, d) { var k = dateKey(y, m, d); return k >= dateKey(A.y, A.m, A.d) && k <= dateKey(B.y != null ? B.y : A.y, B.m, B.d); } };
+    var ka = (A.m + 1) * 100 + A.d, kb = (B.m + 1) * 100 + B.d;
+    return { kind: ka === kb ? 1 : 3, test: function (y, m, d) { var k = (m + 1) * 100 + d; return ka <= kb ? (k >= ka && k <= kb) : (k >= ka || k <= kb); } };
+  }
+  window.onSpecialDays = function (res) {
+    try {
+      var rows = (res && res.table && res.table.rows) || [], out = [];
+      rows.forEach(function (r) {
+        var c = (r.c || []).map(function (x) { return x && x.v != null ? x.v : ''; });
+        var when = parseWhen(c[0]); if (!when || !String(c[1] || '').trim()) return;
+        var boards = String(c[5] || '').toLowerCase(); if (boards && boards.indexOf('study') < 0 && boards.indexOf('both') < 0 && boards.indexOf('all') < 0) return;
+        out.push({ when: when, name: String(c[1]).trim(), message: String(c[4] || '').trim() });
+      });
+      specialRows = out; updateSpecial();
+    } catch (e) {}
+  };
+  var testDay = new URLSearchParams(location.search).get('day');
+  function updateSpecial() {
+    var t = nowParts(), y = t.y, m = t.mo - 1, d = t.d;
+    if (testDay) { var td = /^(\d{1,2})-(\d{1,2})$/.exec(testDay); if (td) { m = +td[1] - 1; d = +td[2]; } }
+    var best = null;
+    specialRows.forEach(function (r) { if (r.when.test(y, m, d) && (!best || r.when.kind < best.when.kind)) best = r; });
+    var el = document.getElementById('special');
+    el.textContent = best ? best.name + (best.message ? ' · ' + best.message : '') : '';
+    el.className = 'clock-special' + (best ? ' on' : '');
+  }
+  function loadSpecialDays() {
+    if (!CFG.specialSheet) return;
+    var old = document.getElementById('special-script'); if (old) old.parentNode.removeChild(old);
+    var sc = document.createElement('script'); sc.id = 'special-script';
+    sc.src = 'https://docs.google.com/spreadsheets/d/' + CFG.specialSheet + '/gviz/tq?tqx=responseHandler:onSpecialDays&headers=1&_=' + Date.now();
+    document.head.appendChild(sc);
+  }
+
   function loadMyLore() {
     if (!CFG.loreSheet) return;
     var old = document.getElementById('my-lore-script'); if (old) old.parentNode.removeChild(old);
@@ -461,6 +521,7 @@
   /* ── Go ── */
   updateClock(); updateMoon(); updateLore(); drawConstellation(); fetchWeather(); loadPhotos();
   loadMyLore(); setInterval(loadMyLore, 60 * 60 * 1000);    // your sheet, re-read hourly
+  loadSpecialDays(); setInterval(loadSpecialDays, 60 * 60 * 1000); setInterval(updateSpecial, 60 * 1000);
   setInterval(function () { updateClock(); updateSun(); updateLore(); }, 1000);
   setInterval(function () { updateMoon(); drawConstellation(); }, 10 * 60 * 1000);
   setInterval(fetchWeather, 10 * 60 * 1000);

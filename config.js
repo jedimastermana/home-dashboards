@@ -17,6 +17,11 @@ window.DASH_CONFIG = {
   // (lore-data.js is only the fallback used when the sheet can't be reached.)
   loreSheet: '1PBloPCFFi4k34e2l1s-hp1dnI4rHI0L56YYy_ad1wtA',
 
+  // Both boards: a Google Sheet of special days (columns: Date | Name | Colors | Effect | Message | Boards),
+  // shared "anyone with the link can view". On a listed day the Lounge recolors itself, runs the effect and
+  // shows the name on a banner; the Study shows the name under its date. See the sheet's header row.
+  specialSheet: '1Zvtyp5dhe80VzC2CJ_To_3GCqTCJOlPIPlsEWA47sTA',
+
   // Lounge: sun-based dimming. Full brightness by day; after sunset a gentle dim (duskOpacity)
   // eases in over duskMinutes; the deep dim (deepOpacity) starts at deepStart; back to full
   // over the wakeMinutes before sunrise. (start/end/opacity are the old fixed-schedule fallback,

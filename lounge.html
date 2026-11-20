@@ -316,7 +316,7 @@
   var W = 1280, H = 800, HOUR = 3600000, DAY = 86400000;
 
   /* ── ?test= previews ──  e.g. lounge.html?test=gate  or  ?test=win:nyj,season:halloween,night,live,fireworks
-     gate · win[:ABBR] · live · season:NAME · night · fireworks · dim:0.5 · alert · rain */
+     gate · win[:ABBR] · live · season:NAME · night · fireworks · dim:0.5 · alert · rain · day:MM-DD (pretend it's that date for special days) */
   var TEST = {};
   (new URLSearchParams(location.search).get('test') || '').split(',').forEach(function (s) {
     if (!s) return; var i = s.indexOf(':'); TEST[i < 0 ? s : s.slice(0, i)] = i < 0 ? true : s.slice(i + 1);
@@ -848,20 +848,105 @@
     if (m === 6 && day === 5 && mins < 30) return 'july4';
     return null;
   }
+  /* ── Special days: a Google Sheet (config.specialSheet) with columns
+       Date | Name | Colors | Effect | Message | Boards
+     Date: 01-25 (every year), 01-25 to 01-27 (a yearly range), 2027-06-12 (one time), or a floating
+       holiday: easter, thanksgiving, mothers day, fathers day, memorial day, labor day.
+     Colors: one or two color words or #hex, e.g. "red" or "pink, gold" (first is the accent, second the tint).
+     Effect: confetti · hearts · petals · leaves · sparkle · lights · bats · fireflies · shamrocks · frost · fireworks · rainbow · none
+     Boards: lounge, study or both (blank = both). A special day outranks the season and a team win. ── */
+  var NAMED = { red: '#e05a5a', green: '#4fb36f', forest: '#3f8a5a', irish: '#2ecc71', blue: '#6aa8e8', navy: '#4f7fd0', pink: '#e0607e',
+    rose: '#f3a7c0', purple: '#b08ae8', lavender: '#c8a2ff', orange: '#e8792a', copper: '#c8641e', yellow: '#ffd166', gold: '#e6c86e',
+    silver: '#d0d8e8', white: '#f2f6f3', teal: '#4fc3c3', mint: '#9ee0b0', black: '#8a8a8a' };
+  var EFFECT_AMBIENT = { hearts: 'hearts', petals: 'petals', leaves: 'leaves', sparkle: 'newyear', bats: 'bats', fireflies: 'fireflies', shamrocks: 'shamrocks', frost: 'frost', lights: 'december' };
+  var specialRows = [];
+  function colorOf(word) { word = String(word || '').trim().toLowerCase().replace(/\s+/g, ''); if (/^#[0-9a-f]{3}([0-9a-f]{3})?$/.test(word)) return word; return NAMED[word] || null; }
+  function floating(key, y) {   // → [month, day] (0-based month) for the floating holidays
+    key = key.toLowerCase().replace(/[^a-z]/g, '');
+    function nth(m, dow, n) { var first = new Date(Date.UTC(y, m, 1)).getUTCDay(); return [m, 1 + ((dow - first + 7) % 7) + 7 * (n - 1)]; }
+    function last(m, dow) { var d = new Date(Date.UTC(y, m + 1, 0)); return [m, d.getUTCDate() - ((d.getUTCDay() - dow + 7) % 7)]; }
+    if (key === 'easter') { var a = y % 19, b = Math.floor(y / 100), c = y % 100, d = Math.floor(b / 4), e = b % 4, f = Math.floor((b + 8) / 25), g = Math.floor((b - f + 1) / 3), h = (19 * a + b - d - g + 15) % 30, i = Math.floor(c / 4), k = c % 4, l = (32 + 2 * e + 2 * i - h - k) % 7, m = Math.floor((a + 11 * h + 22 * l) / 451), mo = Math.floor((h + l - 7 * m + 114) / 31), da = ((h + l - 7 * m + 114) % 31) + 1; return [mo - 1, da]; }
+    if (key === 'thanksgiving') return nth(10, 4, 4);
+    if (key === 'mothersday') return nth(4, 0, 2);
+    if (key === 'fathersday') return nth(5, 0, 3);
+    if (key === 'memorialday') return last(4, 1);
+    if (key === 'laborday') return nth(8, 1, 1);
+    return null;
+  }
+  function dateKey(y, m, d) { return y * 10000 + (m + 1) * 100 + d; }
+  function parseWhen(v) {   // → { kind, test(y, m, d) }  or null; kind: 0 one-time, 1 yearly day, 2 floating, 3 yearly range
+    if (v instanceof Date) { var vm = v.getMonth(), vd = v.getDate(); return { kind: 1, test: function (y, m, d) { return m === vm && d === vd; } }; }
+    var t = String(v || '').trim().toLowerCase(); if (!t) return null;
+    var parts = t.split(/\s+(?:to|-|–|through)\s+/), a = parts[0], b = parts[1] || parts[0];
+    function one(x) { var m1 = /^(\d{4})-(\d{1,2})-(\d{1,2})$/.exec(x), m2 = /^(\d{1,2})[-\/](\d{1,2})$/.exec(x); if (m1) return { y: +m1[1], m: +m1[2] - 1, d: +m1[3] }; if (m2) return { m: +m2[1] - 1, d: +m2[2] }; return null; }
+    if (floating(a, 2000)) return { kind: 2, test: function (y, m, d) { var f = floating(a, y); return f && f[0] === m && f[1] === d; } };
+    var A = one(a), B = one(b); if (!A || !B) return null;
+    if (A.y != null) return { kind: 0, test: function (y, m, d) { var k = dateKey(y, m, d); return k >= dateKey(A.y, A.m, A.d) && k <= dateKey(B.y != null ? B.y : A.y, B.m, B.d); } };
+    var ka = (A.m + 1) * 100 + A.d, kb = (B.m + 1) * 100 + B.d;
+    return { kind: ka === kb ? 1 : 3, test: function (y, m, d) { var k = (m + 1) * 100 + d; return ka <= kb ? (k >= ka && k <= kb) : (k >= ka || k <= kb); } };
+  }
+  window.onSpecialDays = function (res) {
+    try {
+      var rows = (res && res.table && res.table.rows) || [], out = [];
+      rows.forEach(function (r) {
+        var c = (r.c || []).map(function (x) { return x && x.v != null ? x.v : ''; });
+        var when = parseWhen(c[0]); if (!when || !String(c[1] || '').trim()) return;
+        var boards = String(c[5] || '').toLowerCase(); if (boards && boards.indexOf('lounge') < 0 && boards.indexOf('both') < 0 && boards.indexOf('all') < 0) return;
+        var cols = String(c[2] || '').split(/[,/]/).map(colorOf).filter(Boolean);
+        out.push({ when: when, name: String(c[1]).trim(), colors: cols, effect: String(c[3] || '').trim().toLowerCase(), message: String(c[4] || '').trim() });
+      });
+      specialRows = out; applyTheme();
+    } catch (e) {}
+  };
+  function loadSpecialDays() {
+    if (!CFG.specialSheet) return;
+    var old = document.getElementById('special-script'); if (old) old.parentNode.removeChild(old);
+    var sc = document.createElement('script'); sc.id = 'special-script';
+    sc.src = 'https://docs.google.com/spreadsheets/d/' + CFG.specialSheet + '/gviz/tq?tqx=responseHandler:onSpecialDays&headers=1&_=' + Date.now();
+    document.head.appendChild(sc);
+  }
+  function specialToday(w) {
+    var d = new Date(w), y = d.getUTCFullYear(), m = d.getUTCMonth(), day = d.getUTCDate();
+    if (TEST.day) { var td = /^(\d{1,2})-(\d{1,2})$/.exec(TEST.day); if (td) { m = +td[1] - 1; day = +td[2]; } }
+    var best = null;
+    specialRows.forEach(function (r) { if (r.when.test(y, m, day) && (!best || r.when.kind < best.when.kind)) best = r; });
+    return best;
+  }
+  function specialPalette(sp) {
+    var accent = sp.colors[0] || BASE_PAL.gold, tint = sp.colors[1] || mix(accent, '#000000', 0.45);
+    return { gold: accent, 'gold-dim': mix(accent, '#000000', 0.45), hi: mix(accent, '#ffffff', 0.4), frame: accent, border: mix(tint, '#000000', 0.5), 'border-today': mix(tint, '#ffffff', 0.25),
+      bg: mix(tint, '#000000', 0.78), bg2: mix(tint, '#000000', 0.72), 'bg-today': mix(tint, '#000000', 0.62) };
+  }
+  var CONFETTI_RAINBOW = ['#ff4a4a', '#ffd166', '#4ade80', '#60a5fa', '#f472b6', '#c8a2ff'];
+
   function applyTheme() {
-    var now = nowWall(), night = TEST.night ? true : !wx.isDay, season = TEST.season || seasonOf(now), win = currentWin();
+    var now = nowWall(), night = TEST.night ? true : !wx.isDay, season = TEST.season || seasonOf(now), win = currentWin(), spd = specialToday(now);
     var pal = {}; Object.keys(BASE_PAL).forEach(function (k) { pal[k] = BASE_PAL[k]; });
     var sp = SEASON_PAL[season] || {}; Object.keys(sp).forEach(function (k) { pal[k] = sp[k]; });
     if (win) pal = winPalette(win.team);
+    if (spd) pal = specialPalette(spd);
     setPalette(pal);
-    var banner = document.getElementById('winbanner');
-    if (win) {
+    var banner = document.getElementById('winbanner'), logo = document.getElementById('win-logo');
+    logo.style.display = spd ? 'none' : '';
+    if (spd) {
+      banner.style.setProperty('--t1', pal.bg2); banner.style.setProperty('--t2', pal.hi);
+      document.getElementById('win-head').textContent = spd.name;
+      document.getElementById('win-sub').textContent = spd.message || '';
+      banner.classList.add('on');
+    } else if (win) {
       banner.style.setProperty('--t1', win.team.colors[0]); banner.style.setProperty('--t2', lum(win.team.colors[1]) > 0.85 ? '#ffffff' : win.team.colors[1]);
       document.getElementById('win-logo').src = 'https://a.espncdn.com/i/teamlogos/' + win.team.league + '/500-dark/' + win.team.abbr.toLowerCase() + '.png';
       document.getElementById('win-head').textContent = win.team.name.toUpperCase() + ' WIN!';
       document.getElementById('win-sub').textContent = (win.us != null ? win.us + '–' + win.them + ' ' : '') + (win.home ? 'over ' : 'at ') + win.oppName + ' · ' + dayLabel(win.when);
       banner.classList.add('on');
     } else banner.classList.remove('on');
+    if (spd) {
+      var ef = spd.effect, conf = spd.colors.length ? [spd.colors[0], spd.colors[1] || mix(spd.colors[0], '#ffffff', 0.5)] : CONFETTI_RAINBOW;
+      fx.setAmbient(EFFECT_AMBIENT[ef] || (ef === 'none' || ef === 'confetti' || ef === 'fireworks' || ef === 'rainbow' ? null : ambientFor(season, night)), pal);
+      fx.setFireworks(ef === 'fireworks' && night ? 'july4' : fireworksNow(now, night), pal);
+      fx.setConfetti(ef === 'rainbow' ? CONFETTI_RAINBOW : (ef === 'confetti' || (ef === 'fireworks' && !night)) ? conf : null);
+      return;
+    }
     fx.setAmbient(ambientFor(season, night), pal);
     fx.setFireworks(fireworksNow(now, night), pal);
     fx.setConfetti(win ? win.team.colors : null);
@@ -1140,6 +1225,7 @@
   setInterval(fetchSensors, 20 * 1000);
   setInterval(function () { updateSunBar(); updateDim(); }, 30 * 1000);
   setInterval(function () { applyTheme(); pollLive(); }, 60 * 1000);
+  loadSpecialDays(); setInterval(loadSpecialDays, 60 * 60 * 1000);   // the special-days sheet, re-read hourly
   setInterval(updateMoon, 10 * 60 * 1000);
   setInterval(fetchWeather, 10 * 60 * 1000);
   setInterval(fetchAlerts, 10 * 60 * 1000);

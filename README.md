@@ -12,6 +12,10 @@ Two wall-screen dashboards that replaced DAKboard.
   shared anyone-with-link). `config.loreSheet` names it; it holds the whole library (the original entries were
   copied in), so add, edit or delete rows freely; the board re-reads it hourly. `lore-data.js` is only the
   fallback when the sheet can't be reached, plus the constellations.
+- Special days: the Google Sheet "Dashboard Special Days" (Date | Name | Colors | Effect | Message | Boards; the
+  "How to" tab explains each). `config.specialSheet` names it. On a listed day the Lounge takes the row's colors,
+  runs its effect and shows the name on the banner; the Study shows the name under the date. Preview one with
+  `lounge.html?test=day:01-25` or `study.html?day=01-25`.
 - `apps-script/` — reference copy of the "Home Dashboards Feed" Google Apps Script (the live one is deployed from script.google.com)
 
 Data comes from the "Home Dashboards Feed" Google Apps Script (read-only: next 3 weeks of
