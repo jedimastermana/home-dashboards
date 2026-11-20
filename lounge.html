@@ -194,7 +194,9 @@
   #winbanner { left: 19px; top: 687px; width: 518px; height: 94px; z-index: 114; display: none; align-items: center; gap: 14px; padding: 0 18px; background: linear-gradient(90deg, var(--t1) 0%, rgba(0,0,0,.78) 100%); border-top: 3px solid var(--t2); }
   #winbanner.on { display: flex; }
   #winbanner img { width: 60px; height: 60px; object-fit: contain; filter: drop-shadow(0 2px 6px rgba(0,0,0,.6)); flex-shrink: 0; }
-  .win-head { font-family: 'Archivo Black', sans-serif; font-size: 30px; color: var(--t2); line-height: 1; letter-spacing: 1px; text-shadow: 0 2px 8px rgba(0,0,0,.5); white-space: nowrap; }
+  .win-head { font-family: 'Archivo Black', sans-serif; font-size: 30px; color: var(--t2); line-height: 1.05; letter-spacing: 1px; text-shadow: 0 2px 8px rgba(0,0,0,.5); }
+  .win-head.long { font-size: 24px; } .win-head.longer { font-size: 19px; letter-spacing: .5px; }
+  #winbanner > div { min-width: 0; }
   .win-sub { font-size: 15px; color: #fff; margin-top: 5px; text-shadow: 0 1px 4px rgba(0,0,0,.6); }
 
   /* ── GATES & DOORS ── */
@@ -914,6 +916,10 @@
   }
   function specialPalette(sp) {
     var accent = sp.colors[0] || BASE_PAL.gold, tint = sp.colors[1] || mix(accent, '#000000', 0.45);
+    if (sp.effect === 'rainbow' && !sp.colors.length) {   // the colors walk around the rainbow, one step a minute
+      var i = Math.floor(Date.now() / 60000) % CONFETTI_RAINBOW.length;
+      accent = CONFETTI_RAINBOW[i]; tint = CONFETTI_RAINBOW[(i + 2) % CONFETTI_RAINBOW.length];
+    }
     return { gold: accent, 'gold-dim': mix(accent, '#000000', 0.45), hi: mix(accent, '#ffffff', 0.4), frame: accent, border: mix(tint, '#000000', 0.5), 'border-today': mix(tint, '#ffffff', 0.25),
       bg: mix(tint, '#000000', 0.78), bg2: mix(tint, '#000000', 0.72), 'bg-today': mix(tint, '#000000', 0.62) };
   }
@@ -930,21 +936,22 @@
     logo.style.display = spd ? 'none' : '';
     if (spd) {
       banner.style.setProperty('--t1', pal.bg2); banner.style.setProperty('--t2', pal.hi);
-      document.getElementById('win-head').textContent = spd.name;
+      var head = document.getElementById('win-head'); head.textContent = spd.name;
+      head.className = 'win-head' + (spd.name.length > 40 ? ' longer' : spd.name.length > 24 ? ' long' : '');
       document.getElementById('win-sub').textContent = spd.message || '';
       banner.classList.add('on');
     } else if (win) {
       banner.style.setProperty('--t1', win.team.colors[0]); banner.style.setProperty('--t2', lum(win.team.colors[1]) > 0.85 ? '#ffffff' : win.team.colors[1]);
       document.getElementById('win-logo').src = 'https://a.espncdn.com/i/teamlogos/' + win.team.league + '/500-dark/' + win.team.abbr.toLowerCase() + '.png';
-      document.getElementById('win-head').textContent = win.team.name.toUpperCase() + ' WIN!';
+      document.getElementById('win-head').textContent = win.team.name.toUpperCase() + ' WIN!'; document.getElementById('win-head').className = 'win-head';
       document.getElementById('win-sub').textContent = (win.us != null ? win.us + '–' + win.them + ' ' : '') + (win.home ? 'over ' : 'at ') + win.oppName + ' · ' + dayLabel(win.when);
       banner.classList.add('on');
     } else banner.classList.remove('on');
     if (spd) {
       var ef = spd.effect, conf = spd.colors.length ? [spd.colors[0], spd.colors[1] || mix(spd.colors[0], '#ffffff', 0.5)] : CONFETTI_RAINBOW;
-      fx.setAmbient(EFFECT_AMBIENT[ef] || (ef === 'none' || ef === 'confetti' || ef === 'fireworks' || ef === 'rainbow' ? null : ambientFor(season, night)), pal);
+      fx.setAmbient(EFFECT_AMBIENT[ef] || (ef === 'rainbow' ? 'newyear' : ef === 'none' || ef === 'confetti' || ef === 'fireworks' ? null : ambientFor(season, night)), pal);
       fx.setFireworks(ef === 'fireworks' && night ? 'july4' : fireworksNow(now, night), pal);
-      fx.setConfetti(ef === 'rainbow' ? CONFETTI_RAINBOW : (ef === 'confetti' || (ef === 'fireworks' && !night)) ? conf : null);
+      fx.setConfetti(ef === 'rainbow' ? CONFETTI_RAINBOW : (ef === 'confetti' || (ef === 'fireworks' && !night)) ? conf : null, ef === 'rainbow');
       return;
     }
     fx.setAmbient(ambientFor(season, night), pal);
@@ -1146,7 +1153,7 @@
         p.vy += 90 * dt; p.vx *= 0.985; p.vy *= 0.985; p.x += p.vx * dt; p.y += p.vy * dt;
         ctx.fillStyle = p.c; ctx.globalAlpha = Math.min(1, p.life); ctx.beginPath(); ctx.arc(p.x, p.y, 1.9, 0, 6.283); ctx.fill();
       }
-      if (cf.colors && t > cf.next) { burstConfetti(); cf.next = t + rnd(60000, 120000); }
+      if (cf.colors && t > cf.next) { burstConfetti(); cf.next = t + (cf.fast ? rnd(12000, 25000) : rnd(60000, 120000)); }
       for (i = cf.bits.length - 1; i >= 0; i--) {
         p = cf.bits[i]; p.life -= dt; if (p.life <= 0 || p.y > H + 10) { cf.bits.splice(i, 1); continue; }
         p.vy += 260 * dt; p.vy = Math.min(p.vy, 220); p.vx *= 0.99; p.x += (p.vx + Math.sin(t / 300 + p.p) * 40) * dt; p.y += p.vy * dt; p.rot += p.vr * dt;
@@ -1214,7 +1221,7 @@
       setCondition: function (w) { var m = modeOf(w); if (m !== mode || !parts.length) { mode = m; build(); } },
       setAmbient: function (kind, pal) { amb.pal = pal; if (kind !== amb.kind) { amb.kind = kind; buildAmbient(); } },
       setFireworks: function (kind) { if (kind !== fw.kind) { fw.kind = kind; fw.next = 0; } },
-      setConfetti: function (colors) { var k = colors ? colors.join() : null, ok = cf.colors ? cf.colors.join() : null; if (k !== ok) { cf.colors = colors; cf.next = 0; } },
+      setConfetti: function (colors, fast) { cf.fast = !!fast; var k = colors ? colors.join() : null, ok = cf.colors ? cf.colors.join() : null; if (k !== ok) { cf.colors = colors; cf.next = 0; } },
       mode: function () { return mode; }, ambient: function () { return amb.kind; }, counts: function () { return { weather: parts.length, ambient: amb.parts.length, lights: amb.lights.length, fireworks: fw.sparks.length, confetti: cf.bits.length }; }
     };
   })();
