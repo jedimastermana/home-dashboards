@@ -206,8 +206,13 @@
   #gate { left: 0; top: 0; width: 1280px; height: 800px; z-index: 300; display: none; align-items: center; justify-content: center; background: rgba(0,0,0,.6); }
   #gate.on { display: flex; }
   .gate-box { position: relative; width: 1160px; height: 680px; border: 8px solid #ffd0d0; border-radius: 28px; background: #6e0808; overflow: hidden; }
-  .gate-box::before { content: ''; position: absolute; inset: 0; background: #d42020; animation: gatePulse 1s ease-in-out infinite; }
+  .gate-box::before { content: ''; position: absolute; inset: 0; background: #d42020; animation: gatePulse .7s ease-in-out infinite; }
   @keyframes gatePulse { 0%, 100% { opacity: 0; } 50% { opacity: 1; } }
+  /* strobe: the whole screen slams between red and white, 3 times a second */
+  #gate.strobe { animation: gateStrobe .34s steps(1) infinite; }
+  @keyframes gateStrobe { 0% { background: rgba(220,20,20,.92); } 50% { background: rgba(255,255,255,.85); } }
+  #gate.strobe .gate-box { animation: gateBorder .34s steps(1) infinite; }
+  @keyframes gateBorder { 0% { border-color: #ffffff; } 50% { border-color: #ff2020; } }
   .gate-inner { position: relative; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; text-align: center; color: #fff; }
   .gate-head { font-family: 'Archivo Black', sans-serif; font-size: 88px; line-height: 1; letter-spacing: 4px; text-shadow: 0 4px 24px rgba(0,0,0,.5); }
   .gate-item { margin-top: 8px; }
@@ -318,7 +323,7 @@
   var W = 1280, H = 800, HOUR = 3600000, DAY = 86400000;
 
   /* ── ?test= previews ──  e.g. lounge.html?test=gate  or  ?test=win:nyj,season:halloween,night,live,fireworks
-     gate · win[:ABBR] · live · season:NAME · night · fireworks · dim:0.5 · alert · rain · day:MM-DD or day:YYYY-MM-DD (pretend it's that date for special days) */
+     gate (strobe + siren too) · win[:ABBR] · live · season:NAME · night · fireworks · dim:0.5 · alert · rain · day:MM-DD or day:YYYY-MM-DD (pretend it's that date for special days) */
   var TEST = {};
   (new URLSearchParams(location.search).get('test') || '').split(',').forEach(function (s) {
     if (!s) return; var i = s.indexOf(':'); TEST[i < 0 ? s : s.slice(0, i)] = i < 0 ? true : s.slice(i + 1);
@@ -610,6 +615,42 @@
 
   /* ── Gates & doors (SharpTools → feed ?sensor=…&state=… → here, polled every 20 s) ── */
   function durText(mins) { return mins < 60 ? mins + ' min' : Math.floor(mins / 60) + ' h ' + (mins % 60) + ' min'; }
+  /* ── Gate alarm: strobe + siren while a gate is open.
+     First 30 s: strobe and siren non-stop. After that, every minute: a 10 s strobe and 6 s of siren.
+     Sound needs the kiosk browser to allow autoplay (Fully: Web Content Settings > Autoplay). If Fully's
+     JavaScript interface is on, its own player is used too, which never needs permission. ── */
+  var alarm = (function () {
+    var on = false, t0 = 0, timer = null, ac = null, osc = null, gain = null, lfo = null, sirenUntil = 0;
+    var gate = function () { return document.getElementById('gate'); };
+    function sirenOn() {
+      if (window.fully && typeof fully.playSound === 'function') { try { fully.playSound(location.href.replace(/[^\/]*$/, '') + 'alarm.wav', true); } catch (e) {} }
+      try {
+        if (!ac) ac = new (window.AudioContext || window.webkitAudioContext)();
+        if (ac.state === 'suspended') ac.resume();
+        if (osc) return;
+        osc = ac.createOscillator(); gain = ac.createGain(); lfo = ac.createOscillator(); var lg = ac.createGain();
+        osc.type = 'square'; osc.frequency.value = 770; lfo.type = 'square'; lfo.frequency.value = 2; lg.gain.value = 110;
+        lfo.connect(lg); lg.connect(osc.frequency); gain.gain.value = 0.25; osc.connect(gain); gain.connect(ac.destination); osc.start(); lfo.start();
+      } catch (e) {}
+    }
+    function sirenOff() {
+      if (window.fully && typeof fully.stopSound === 'function') { try { fully.stopSound(); } catch (e) {} }
+      try { if (osc) { osc.stop(); lfo.stop(); osc.disconnect(); lfo.disconnect(); } } catch (e) {}
+      osc = lfo = gain = null;
+    }
+    function step() {
+      var el = Date.now() - t0, inMinute = el % 60000;
+      var strobe = el < 30000 || inMinute < 10000, siren = el < 30000 || inMinute < 6000;
+      gate().classList.toggle('strobe', strobe);
+      if (siren) sirenOn(); else sirenOff();
+    }
+    return {
+      start: function () { if (on) return; on = true; t0 = Date.now(); step(); timer = setInterval(step, 500); },
+      stop: function () { if (!on) return; on = false; clearInterval(timer); gate().classList.remove('strobe'); sirenOff(); },
+      active: function () { return on; }
+    };
+  })();
+
   function renderSensors(list) {
     var now = nowWall(), open = (list || []).filter(function (s) { return s.open; });
     var gates = open.filter(function (s) { return s.kind === 'gate'; }), others = open.filter(function (s) { return s.kind !== 'gate'; });
@@ -619,8 +660,8 @@
         var w = s.since ? wallParse(s.since) : now, mins = Math.max(0, Math.round((now - w) / 60000));
         return '<div class="gate-item"><div class="gate-name">' + esc(s.name) + '</div><div class="gate-since">open since ' + clockFull(w).toLowerCase() + ' (' + durText(mins) + ')</div></div>';
       }).join('');
-      gate.classList.add('on');
-    } else gate.classList.remove('on');
+      gate.classList.add('on'); alarm.start();
+    } else { gate.classList.remove('on'); alarm.stop(); }
     document.getElementById('chips').innerHTML = others.map(function (s) {
       var w = s.since ? wallParse(s.since) : now, mins = Math.max(0, Math.round((now - w) / 60000));
       return '<div class="chip">' + (s.kind === 'garage' ? '🚗' : '🚪') + ' ' + esc(s.name) + ' <b>open</b> · ' + durText(mins) + '</div>';
