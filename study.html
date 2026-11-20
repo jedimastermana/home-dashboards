@@ -460,7 +460,7 @@
   var testDay = new URLSearchParams(location.search).get('day');
   function updateSpecial() {
     var t = nowParts(), y = t.y, m = t.mo - 1, d = t.d;
-    if (testDay) { var td = /^(\d{1,2})-(\d{1,2})$/.exec(testDay); if (td) { m = +td[1] - 1; d = +td[2]; } }
+    if (testDay) { var td = /^(?:(\d{4})-)?(\d{1,2})-(\d{1,2})$/.exec(testDay); if (td) { if (td[1]) y = +td[1]; m = +td[2] - 1; d = +td[3]; } }
     var best = null;
     specialRows.forEach(function (r) { if (r.when.test(y, m, d) && (!best || r.when.kind < best.when.kind)) best = r; });
     var el = document.getElementById('special');

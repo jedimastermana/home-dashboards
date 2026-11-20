@@ -316,7 +316,7 @@
   var W = 1280, H = 800, HOUR = 3600000, DAY = 86400000;
 
   /* ── ?test= previews ──  e.g. lounge.html?test=gate  or  ?test=win:nyj,season:halloween,night,live,fireworks
-     gate · win[:ABBR] · live · season:NAME · night · fireworks · dim:0.5 · alert · rain · day:MM-DD (pretend it's that date for special days) */
+     gate · win[:ABBR] · live · season:NAME · night · fireworks · dim:0.5 · alert · rain · day:MM-DD or day:YYYY-MM-DD (pretend it's that date for special days) */
   var TEST = {};
   (new URLSearchParams(location.search).get('test') || '').split(',').forEach(function (s) {
     if (!s) return; var i = s.indexOf(':'); TEST[i < 0 ? s : s.slice(0, i)] = i < 0 ? true : s.slice(i + 1);
@@ -907,7 +907,7 @@
   }
   function specialToday(w) {
     var d = new Date(w), y = d.getUTCFullYear(), m = d.getUTCMonth(), day = d.getUTCDate();
-    if (TEST.day) { var td = /^(\d{1,2})-(\d{1,2})$/.exec(TEST.day); if (td) { m = +td[1] - 1; day = +td[2]; } }
+    if (TEST.day) { var td = /^(?:(\d{4})-)?(\d{1,2})-(\d{1,2})$/.exec(TEST.day); if (td) { if (td[1]) y = +td[1]; m = +td[2] - 1; day = +td[3]; } }
     var best = null;
     specialRows.forEach(function (r) { if (r.when.test(y, m, day) && (!best || r.when.kind < best.when.kind)) best = r; });
     return best;
